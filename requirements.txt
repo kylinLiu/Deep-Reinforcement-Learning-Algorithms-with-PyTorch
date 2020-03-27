@@ -5,4 +5,4 @@ PyVirtualDisplay==0.2.1
 gym==0.10.9
 nn_builder
 tensorflow
-gym-anytrading
+GIT+https://github.com/kylinLiu/gym-anytrading.git
