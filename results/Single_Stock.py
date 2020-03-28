@@ -26,7 +26,8 @@ from agents.DQN_agents.DQN_With_Fixed_Q_Targets import DQN_With_Fixed_Q_Targets
 
 config = Config()
 config.seed = 1
-config.environment  = gym.make('stocks-v0', frame_bound=(50, 100), window_size=10)
+# config.environment  = gym.make('stocks-v0', frame_bound=(50, 100), window_size=10)
+config.environment  = gym.make('stocks-v0')
 # config.environment = gym.make("CartPole-v0")
 config.num_episodes_to_run = 450
 config.file_to_save_data_results = "results/data_and_graphs/Cart_Pole_Results_Data.pkl"
