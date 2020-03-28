@@ -51,7 +51,7 @@ class SAC_Discrete(SAC):
     def produce_action_and_action_info(self, state):
         """Given the state, produces an action, the probability of the action, the log probability of the action, and
         the argmax action"""
-        print("state",state)
+#         print("state",state)
         action_probabilities = self.actor_local(state)
         max_probability_action = torch.argmax(action_probabilities).unsqueeze(0)
         action_distribution = create_actor_distribution(self.action_types, action_probabilities, self.action_size)
