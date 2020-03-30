@@ -144,6 +144,11 @@ class SAC(Base_Agent):
     def learn(self):
         """Runs a learning iteration for the actor, both critics and (if specified) the temperature parameter"""
         state_batch, action_batch, reward_batch, next_state_batch, mask_batch = self.sample_experiences()
+        print("learn_state_batch",state_batch)
+        print("learn_action_batch",action_batch)
+        print("learn_reward_batch",reward_batch)
+        print("learn_next_state_batch",next_state_batch)
+        print("learn_mask_batch",mask_batch)
         qf1_loss, qf2_loss = self.calculate_critic_losses(state_batch, action_batch, reward_batch, next_state_batch, mask_batch)
         policy_loss, log_pi = self.calculate_actor_loss(state_batch)
         if self.automatic_entropy_tuning: alpha_loss = self.calculate_entropy_tuning_loss(log_pi)
