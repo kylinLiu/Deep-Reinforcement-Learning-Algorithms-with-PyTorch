@@ -8,7 +8,7 @@ class Replay_Buffer(object):
     """重播缓冲区以存储过去的经验，代理可以将其用于训练数据"""
     
     def __init__(self, buffer_size, batch_size, seed):
-        print("init Replay_Buffer,buffer_size:{},batch_size:{},seed:{}".format(buffer_size, batch_size, seed)))
+        print("init Replay_Buffer,buffer_size:{},batch_size:{},seed:{}".format(buffer_size, batch_size, seed))
         self.memory = deque(maxlen=buffer_size)
         self.batch_size = batch_size
         self.experience = namedtuple("Experience", field_names=["state", "action", "reward", "next_state", "done"])
