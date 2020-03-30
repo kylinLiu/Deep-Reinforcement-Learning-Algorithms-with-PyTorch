@@ -149,7 +149,7 @@ class SAC(Base_Agent):
         """Given the state, produces an action, the log probability of the action, and the tanh of the mean action"""
         """给定状态，产生一个动作，该动作的对数概率和平均动作的tanh"""
         actor_output = self.actor_local(state)
-	print("actor_output:",actor_output)
+        print("actor_output:",actor_output)
         mean, log_std = actor_output[:, :self.action_size], actor_output[:, self.action_size:]
         std = log_std.exp()
         normal = Normal(mean, std)
