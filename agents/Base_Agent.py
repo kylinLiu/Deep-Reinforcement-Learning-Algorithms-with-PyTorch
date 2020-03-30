@@ -156,6 +156,7 @@ class Base_Agent(object):
         """Resets the game information so we are ready to play a new episode"""
         self.environment.seed(self.config.seed)
         self.state = self.environment.reset()
+        print("reset state",self.state)
         self.next_state = None
         self.action = None
         self.reward = None
