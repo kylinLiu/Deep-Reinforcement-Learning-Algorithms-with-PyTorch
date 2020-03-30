@@ -130,11 +130,11 @@ class SAC(Base_Agent):
         """Uses actor to pick an action in one of two ways: 1) If eval = False and we aren't in eval mode then it picks
         an action that has partly been randomly sampled 2) If eval = True then we pick the action that comes directly
         from the network and so did not involve any random sampling"""
-	"""
+        """
 	使用actor以两种方式之一选择动作：
         1）如果eval = False，并且我们不在eval模式下，则它将选择已部分随机采样的操作
         2）如果eval = True，则我们选择直接来自网络的操作，因此不涉及任何随机采样“”“
-	"""
+        """
         if state is None: state = self.state
         state = torch.FloatTensor([state]).to(self.device)
         if len(state.shape) == 1: state = state.unsqueeze(0)
@@ -147,7 +147,7 @@ class SAC(Base_Agent):
 
     def produce_action_and_action_info(self, state):
         """Given the state, produces an action, the log probability of the action, and the tanh of the mean action"""
-	"""给定状态，产生一个动作，该动作的对数概率和平均动作的tanh"""
+        """给定状态，产生一个动作，该动作的对数概率和平均动作的tanh"""
         actor_output = self.actor_local(state)
 	print("actor_output:",actor_output)
         mean, log_std = actor_output[:, :self.action_size], actor_output[:, self.action_size:]
