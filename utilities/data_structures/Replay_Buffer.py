@@ -17,6 +17,8 @@ class Replay_Buffer(object):
 
     def add_experience(self, states, actions, rewards, next_states, dones):
         """Adds experience(s) into the replay buffer"""
+        """将经验添加到重播缓冲区中"""
+        print("add_experience xxxxxxxxxxxx".)
         if type(dones) == list:
             assert type(dones[0]) != list, "A done shouldn't be a list"
             experiences = [self.experience(state, action, reward, next_state, done)
