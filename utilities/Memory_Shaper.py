@@ -7,6 +7,7 @@ import random
 class Memory_Shaper(object):
     """Takes in the experience of full episodes and reshapes it according to macro-actions you define. Then it provides
     a replay buffer with this reshaped data to learn from"""
+    """汲取整集的经验，并根据您定义的宏观动作对其进行重塑。 然后，它提供一个重播缓冲区，其中包含此重整后的数据以供学习"""
     def __init__(self, buffer_size, batch_size, seed, new_reward_fn, action_balanced_replay_buffer=True):
         self.reset()
         self.buffer_size = buffer_size
@@ -73,6 +74,7 @@ class Memory_Shaper(object):
         assert len(states) == len(next_states) == len(rewards) == len(dones) == len(actions), "{} {} {} {} {} = {}".format(len(states), len(next_states), len(rewards), len(dones), len(actions), actions)
         steps = len(states)
         for step in range(steps):
+            print("memory_shaper  add_experience")
             replay_buffer.add_experience(states[step], actions[step], rewards[step], next_states[step], dones[step])
             for action_length in range(2, max_action_length + 1):
                 if step < action_length - 1: continue
@@ -85,6 +87,7 @@ class Memory_Shaper(object):
                     new_reward = self.new_reward_fn(new_reward, len(action_sequence))
                     new_next_state = next_states[step]
                     new_dones = dones[step]
+                    print("memory_shaper  add_experience222")
                     replay_buffer.add_experience(new_state, new_action, new_reward, new_next_state, new_dones)
 
 
