@@ -81,6 +81,7 @@ class SAC(Base_Agent):
         self.episode_step_number_val = 0
         while not self.done:
             self.episode_step_number_val += 1
+            print("self.state_size/self.action_size:{}/{}".format(self.state_size, self.action_size))
             self.action = self.pick_action(eval_ep)
             print("pick_action",self.action)
             self.conduct_action(self.action)
