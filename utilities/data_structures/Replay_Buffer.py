@@ -5,6 +5,7 @@ import numpy as np
 
 class Replay_Buffer(object):
     """Replay buffer to store past experiences that the agent can then use for training data"""
+    """重播缓冲区以存储过去的经验，代理可以将其用于训练数据"""
     
     def __init__(self, buffer_size, batch_size, seed):
 
