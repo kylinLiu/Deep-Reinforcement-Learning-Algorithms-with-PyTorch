@@ -103,6 +103,19 @@ class SAC(Base_Agent):
         """Picks an action using one of three methods: 1) Randomly if we haven't passed a certain number of steps,
          2) Using the actor in evaluation mode if eval_ep is True  3) Using the actor in training mode if eval_ep is False.
          The difference between evaluation and training mode is that training mode does more exploration"""
+        """	Picks an action using one of three methods: 
+	      1) Randomly if we haven't passed a certain number of steps,
+          2) Using the actor in evaluation mode if eval_ep is True 
+	      3) Using the actor in training mode if eval_ep is False.
+         The difference between evaluation and training mode is that training mode does more exploration
+	    """
+        """
+        使用以下三种方法之一选择一个动作：
+        1）如果我们没有经过一定数量的步骤，则是随机的，
+        2）如果eval_ep为True，则在评估模式下使用actor
+        3）如果eval_ep为False，则在训练模式下使用actor。
+          评估模式与培训模式之间的差异在于，培训模式需要更多的探索
+        """
         if state is None: state = self.state
         if eval_ep: action = self.actor_pick_action(state=state, eval=True)
         elif self.global_step_number < self.hyperparameters["min_steps_before_learning"]:
