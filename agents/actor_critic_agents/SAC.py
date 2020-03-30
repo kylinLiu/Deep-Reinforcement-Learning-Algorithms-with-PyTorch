@@ -130,6 +130,11 @@ class SAC(Base_Agent):
         """Uses actor to pick an action in one of two ways: 1) If eval = False and we aren't in eval mode then it picks
         an action that has partly been randomly sampled 2) If eval = True then we pick the action that comes directly
         from the network and so did not involve any random sampling"""
+	"""
+	使用actor以两种方式之一选择动作：
+        1）如果eval = False，并且我们不在eval模式下，则它将选择已部分随机采样的操作
+        2）如果eval = True，则我们选择直接来自网络的操作，因此不涉及任何随机采样“”“
+	"""
         if state is None: state = self.state
         state = torch.FloatTensor([state]).to(self.device)
         if len(state.shape) == 1: state = state.unsqueeze(0)
