@@ -32,7 +32,7 @@ class Replay_Buffer(object):
     def sample(self, num_experiences=None, separate_out_data_types=True):
         """Draws a random sample of experience from the replay buffer"""
         experiences = self.pick_experiences(num_experiences)
-        print("experiences",experiences)
+        # print("experiences",experiences)
         if separate_out_data_types:
             states, actions, rewards, next_states, dones = self.separate_out_data_types(experiences)
             return states, actions, rewards, next_states, dones
