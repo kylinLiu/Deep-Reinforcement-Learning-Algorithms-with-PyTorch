@@ -76,6 +76,7 @@ class SAC(Base_Agent):
 
     def step(self):
         """Runs an episode on the game, saving the experience and running a learning step if appropriate"""
+        """在游戏中运行一集，保存经验并在适当时运行学习步骤"""
         eval_ep = self.episode_number % TRAINING_EPISODES_PER_EVAL_EPISODE == 0 and self.do_evaluation_iterations
         self.episode_step_number_val = 0
         while not self.done:
