@@ -74,7 +74,7 @@ class Memory_Shaper(object):
         assert len(states) == len(next_states) == len(rewards) == len(dones) == len(actions), "{} {} {} {} {} = {}".format(len(states), len(next_states), len(rewards), len(dones), len(actions), actions)
         steps = len(states)
         for step in range(steps):
-            print("memory_shaper  add_experience")
+#             print("memory_shaper  add_experience")
             replay_buffer.add_experience(states[step], actions[step], rewards[step], next_states[step], dones[step])
             for action_length in range(2, max_action_length + 1):
                 if step < action_length - 1: continue
@@ -87,7 +87,7 @@ class Memory_Shaper(object):
                     new_reward = self.new_reward_fn(new_reward, len(action_sequence))
                     new_next_state = next_states[step]
                     new_dones = dones[step]
-                    print("memory_shaper  add_experience222")
+#                     print("memory_shaper  add_experience222")
                     replay_buffer.add_experience(new_state, new_action, new_reward, new_next_state, new_dones)
 
 
