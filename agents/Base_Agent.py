@@ -30,6 +30,8 @@ class Base_Agent(object):
         self.state_size =  int(self.get_state_size())
         self.hyperparameters = config.hyperparameters
         self.average_score_required_to_win = self.get_score_required_to_win()
+        print("average_score_required_to_win",self.average_score_required_to_win)
+        raise Exception("zzzzzzzzzzzzzzz")
         self.rolling_score_window = self.get_trials()
         # self.max_steps_per_episode = self.environment.spec.max_episode_steps
         self.total_episode_score_so_far = 0
