@@ -60,8 +60,8 @@ class SAC_Discrete(SAC):
         # Have to deal with situation of 0.0 probabilities because we can't do log 0
         z = action_probabilities == 0.0
         z = z.float() * 1e-8
-        print("action_probabilities",action_probabilities)
-        print("max_probability_action",max_probability_action)
+#         print("action_probabilities",action_probabilities)
+#         print("max_probability_action",max_probability_action)
         print("action",action)
         log_action_probabilities = torch.log(action_probabilities + z)
         return action, (action_probabilities, log_action_probabilities), max_probability_action
