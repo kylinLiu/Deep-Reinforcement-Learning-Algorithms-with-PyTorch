@@ -53,14 +53,16 @@ class SAC_Discrete(SAC):
         the argmax action"""
 #         print("state",state)
         action_probabilities = self.actor_local(state)
-#         print("action_probabilities",action_probabilities)
         max_probability_action = torch.argmax(action_probabilities).unsqueeze(0)
-#         print("max_probability_action",max_probability_action)
+        print("max_probability_action",max_probability_action)
         action_distribution = create_actor_distribution(self.action_types, action_probabilities, self.action_size)
         action = action_distribution.sample().cpu()
         # Have to deal with situation of 0.0 probabilities because we can't do log 0
         z = action_probabilities == 0.0
         z = z.float() * 1e-8
+        print("action_probabilities",action_probabilities)
+        print("max_probability_action",max_probability_action)
+        print("action",action)
         log_action_probabilities = torch.log(action_probabilities + z)
         return action, (action_probabilities, log_action_probabilities), max_probability_action
 
