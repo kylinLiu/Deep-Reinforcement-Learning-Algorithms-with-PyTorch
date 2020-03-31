@@ -186,9 +186,9 @@ class Base_Agent(object):
         if num_episodes is None: num_episodes = self.config.num_episodes_to_run
         start = time.time()
         while self.episode_number < num_episodes:
-            print("reset_game,reset_game")
+#             print("reset_game,reset_game")
             self.reset_game()
-            print("step,step")
+#             print("step,step")
             self.step()
             if save_and_print_results: self.save_and_print_result()
         time_taken = time.time() - start
