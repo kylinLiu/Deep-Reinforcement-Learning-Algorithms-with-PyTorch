@@ -156,7 +156,7 @@ class Base_Agent(object):
         """Resets the game information so we are ready to play a new episode"""
         self.environment.seed(self.config.seed)
         self.state = self.environment.reset()
-        print("reset state",self.state)
+#         print("reset state",self.state)
         self.next_state = None
         self.action = None
         self.reward = None
@@ -201,7 +201,7 @@ class Base_Agent(object):
         """在环境中进行操作"""
         self.next_state, self.reward, self.done, _ = self.environment.step(action)
         self.total_episode_score_so_far += self.reward
-        print("total_episode_score_so_far/reward:{}/{}".format(self.total_episode_score_so_far,self.reward))
+#         print("total_episode_score_so_far/reward:{}/{}".format(self.total_episode_score_so_far,self.reward))
         if self.hyperparameters["clip_rewards"]: self.reward =  max(min(self.reward, 1.0), -1.0)
 
 
