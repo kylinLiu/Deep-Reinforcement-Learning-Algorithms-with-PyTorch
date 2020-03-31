@@ -59,6 +59,7 @@ class SAC(Base_Agent):
     def save_result(self):
         """Saves the result of an episode of the game. Overriding the method in Base Agent that does this because we only
         want to keep track of the results during the evaluation episodes"""
+        """保存游戏情节的结果。 覆盖执行此操作的Base Agent中的方法，因为我们只希望在评估情节期间跟踪结果"""
         if self.episode_number == 1 or not self.do_evaluation_iterations:
             self.game_full_episode_scores.extend([self.total_episode_score_so_far])
             self.rolling_results.append(np.mean(self.game_full_episode_scores[-1 * self.rolling_score_window:]))
