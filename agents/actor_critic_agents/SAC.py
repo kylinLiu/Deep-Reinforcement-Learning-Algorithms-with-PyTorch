@@ -80,22 +80,22 @@ class SAC(Base_Agent):
         eval_ep = self.episode_number % TRAINING_EPISODES_PER_EVAL_EPISODE == 0 and self.do_evaluation_iterations
         self.episode_step_number_val = 0
         while not self.done:
-            print("episode_step_number_val",self.episode_step_number_val)
+#             print("episode_step_number_val",self.episode_step_number_val)
             self.episode_step_number_val += 1
-            print("self.state_size/self.action_size:{}/{}".format(self.state_size, self.action_size))
+#             print("self.state_size/self.action_size:{}/{}".format(self.state_size, self.action_size))
             self.action = self.pick_action(eval_ep)
-            print("pick_action",self.action)
+#             print("pick_action",self.action)
             self.conduct_action(self.action)
             if self.time_for_critic_and_actor_to_learn():
                 for _ in range(self.hyperparameters["learning_updates_per_learning_session"]):
                     self.learn()
             mask = False if self.episode_step_number_val >= self.environment._max_episode_steps else self.done
             if not eval_ep:
-                print("step save_experience")
+#                 print("step save_experience")
                 self.save_experience(experience=(self.state, self.action, self.reward, self.next_state, mask))
             self.state = self.next_state
             self.global_step_number += 1
-        print(self.total_episode_score_so_far)
+#         print(self.total_episode_score_so_far)
         if eval_ep: self.print_summary_of_latest_evaluation_episode()
         self.episode_number += 1
 
@@ -120,7 +120,7 @@ class SAC(Base_Agent):
         if eval_ep: action = self.actor_pick_action(state=state, eval=True)
         elif self.global_step_number < self.hyperparameters["min_steps_before_learning"]:
             action = self.environment.action_space.sample()
-            print("Picking random action ", action)
+#             print("Picking random action ", action)
         else: action = self.actor_pick_action(state=state)
         if self.add_extra_noise:
             action += self.noise.sample()
@@ -149,7 +149,7 @@ class SAC(Base_Agent):
         """Given the state, produces an action, the log probability of the action, and the tanh of the mean action"""
         """给定状态，产生一个动作，该动作的对数概率和平均动作的tanh"""
         actor_output = self.actor_local(state)
-        print("actor_output:",actor_output)
+#         print("actor_output:",actor_output)
         mean, log_std = actor_output[:, :self.action_size], actor_output[:, self.action_size:]
         std = log_std.exp()
         normal = Normal(mean, std)
