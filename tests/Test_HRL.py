@@ -21,6 +21,7 @@ config.use_GPU = False
 config.overwrite_existing_results_file = False
 config.randomise_random_seed = True
 config.save_model = False
+config.load_model = False
 
 linear_hidden_units = [10, 5]
 learning_rate = 0.01

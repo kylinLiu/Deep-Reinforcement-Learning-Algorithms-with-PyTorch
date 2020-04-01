@@ -30,6 +30,7 @@ config.visualise_overall_agent_results = False
 config.randomise_random_seed = False
 config.runs_per_agent = 1
 config.use_GPU = False
+config.load_model = False
 config.hyperparameters = {
 
     "DQN_Agents": {

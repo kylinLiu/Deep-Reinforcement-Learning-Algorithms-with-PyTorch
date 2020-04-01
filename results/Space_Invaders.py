@@ -22,6 +22,7 @@ config.use_GPU = False
 config.overwrite_existing_results_file = False
 config.randomise_random_seed = True
 config.save_model = False
+config.load_model = False
 
 
 # Loss is not drawing a random sample! otherwise wouldnt jump around that much!!

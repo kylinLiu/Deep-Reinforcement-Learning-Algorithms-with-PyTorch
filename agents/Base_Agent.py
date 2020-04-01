@@ -52,6 +52,9 @@ class Base_Agent(object):
         """Takes a step in the game. This method must be overriden by any agent"""
         raise ValueError("Step needs to be implemented by the agent")
 
+    def locally_load_policy(self):
+        raise ValueError("Step needs to be implemented by the agent")
+
     def get_environment_title(self):
         """Extracts name of environment from it"""
         try:
