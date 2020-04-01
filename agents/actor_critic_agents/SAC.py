@@ -16,6 +16,7 @@ class SAC(Base_Agent):
     """Soft Actor-Critic model based on the 2018 paper https://arxiv.org/abs/1812.05905 and on this github implementation
       https://github.com/pranz24/pytorch-soft-actor-critic. It is an actor-critic algorithm where the agent is also trained
       to maximise the entropy of their actions as well as their cumulative reward"""
+    """基于2018年论文https://arxiv.org/abs/1812.05905和此github实现https://github.com/pranz24/pytorch-soft-actor-critic的Soft Actor-Critic模型。 这是一种行为批评算法，其中还对代理进行了训练，以使他们的行为及其累积奖励最大化"""
     agent_name = "SAC"
     def __init__(self, config):
         Base_Agent.__init__(self, config)
@@ -72,6 +73,7 @@ class SAC(Base_Agent):
 
     def reset_game(self):
         """Resets the game information so we are ready to play a new episode"""
+        """重置游戏信息，以便我们准备播放新剧集"""
         Base_Agent.reset_game(self)
         if self.add_extra_noise: self.noise.reset()
 
@@ -132,7 +134,7 @@ class SAC(Base_Agent):
         an action that has partly been randomly sampled 2) If eval = True then we pick the action that comes directly
         from the network and so did not involve any random sampling"""
         """
-	使用actor以两种方式之一选择动作：
+	    使用actor以两种方式之一选择动作：
         1）如果eval = False，并且我们不在eval模式下，则它将选择已部分随机采样的操作
         2）如果eval = True，则我们选择直接来自网络的操作，因此不涉及任何随机采样“”“
         """
@@ -164,11 +166,13 @@ class SAC(Base_Agent):
     def time_for_critic_and_actor_to_learn(self):
         """Returns boolean indicating whether there are enough experiences to learn from and it is time to learn for the
         actor and critic"""
+        """返回布尔值，指示是否有足够的经验可以学习，是时候让演员和评论家学习"""
         return self.global_step_number > self.hyperparameters["min_steps_before_learning"] and \
                self.enough_experiences_to_learn_from() and self.global_step_number % self.hyperparameters["update_every_n_steps"] == 0
 
     def learn(self):
         """Runs a learning iteration for the actor, both critics and (if specified) the temperature parameter"""
+        """为演员，评论家和温度参数（如果指定）运行演员的学习迭代"""
         state_batch, action_batch, reward_batch, next_state_batch, mask_batch = self.sample_experiences()
         # print("learn_state_batch",state_batch)
         # print("learn_action_batch",action_batch)
@@ -216,6 +220,7 @@ class SAC(Base_Agent):
 
     def update_all_parameters(self, critic_loss_1, critic_loss_2, actor_loss, alpha_loss):
         """Updates the parameters for the actor, both critics and (if specified) the temperature parameter"""
+        """更新演员的参数，包括评论者和温度参数（如果指定）"""
         self.take_optimisation_step(self.critic_optimizer, self.critic_local, critic_loss_1,
                                     self.hyperparameters["Critic"]["gradient_clipping_norm"])
         self.take_optimisation_step(self.critic_optimizer_2, self.critic_local_2, critic_loss_2,

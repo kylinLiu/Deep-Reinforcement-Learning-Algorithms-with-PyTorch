@@ -10,6 +10,7 @@ from utilities.Utility_Functions import create_actor_distribution
 class SAC_Discrete(SAC):
     """The Soft Actor Critic for discrete actions. It inherits from SAC for continuous actions and only changes a few
     methods."""
+    """演员评论家的离散动作。 它继承自SAC以进行连续操作，仅更改了一些方法。"""
     agent_name = "SAC"
     def __init__(self, config):
         Base_Agent.__init__(self, config)
@@ -51,6 +52,7 @@ class SAC_Discrete(SAC):
     def produce_action_and_action_info(self, state):
         """Given the state, produces an action, the probability of the action, the log probability of the action, and
         the argmax action"""
+        """给定状态，将产生一个动作，该动作的概率，该动作的对数概率以及argmax动作"""
 #         print("state",state)
         action_probabilities = self.actor_local(state)
         max_probability_action = torch.argmax(action_probabilities).unsqueeze(0)
@@ -68,6 +70,7 @@ class SAC_Discrete(SAC):
     def calculate_critic_losses(self, state_batch, action_batch, reward_batch, next_state_batch, mask_batch):
         """Calculates the losses for the two critics. This is the ordinary Q-learning loss except the additional entropy
          term is taken into account"""
+        """计算两个评论家的损失。 这是普通的Q学习损失，只是考虑了额外的熵项"""
         with torch.no_grad():
             next_state_action, (action_probabilities, log_action_probabilities), _ = self.produce_action_and_action_info(next_state_batch)
             qf1_next_target = self.critic_target(next_state_batch)
@@ -84,6 +87,7 @@ class SAC_Discrete(SAC):
 
     def calculate_actor_loss(self, state_batch):
         """Calculates the loss for the actor. This loss includes the additional entropy term"""
+        """计算演员的损失。 该损失包括附加的熵项"""
         action, (action_probabilities, log_action_probabilities), _ = self.produce_action_and_action_info(state_batch)
         qf1_pi = self.critic_local(state_batch)
         qf2_pi = self.critic_local_2(state_batch)
