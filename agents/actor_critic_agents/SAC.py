@@ -145,7 +145,8 @@ class SAC(Base_Agent):
         else:
             with torch.no_grad():
                 _, z, action = self.produce_action_and_action_info(state)
-        action = action.detach().cpu().numpy()
+        # action = action.detach().cpu().numpy()
+        action = action.detach().numpy()
         return action[0]
 
     def produce_action_and_action_info(self, state):
