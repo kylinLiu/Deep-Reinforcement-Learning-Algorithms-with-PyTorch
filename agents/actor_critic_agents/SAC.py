@@ -269,7 +269,7 @@ class SAC(Base_Agent):
         pass
         critic_local_path = "Models/{}_critic_local.pt".format(self.agent_name)
         critic_local_2_path = "Models/{}_critic_local_2.pt".format(self.agent_name)
-        actor_local_path = "Models/{}_critic_local.pt".format(self.agent_name)
+        actor_local_path = "Models/{}_actor_local.pt".format(self.agent_name)
         torch.save(self.critic_local.state_dict(), critic_local_path)
         torch.save(self.critic_local_2.state_dict(), critic_local_2_path)
         # torch.save(self.critic_target.state_dict(), "Models/{}_critic_target.pt".format(self.agent_name))
@@ -280,7 +280,7 @@ class SAC(Base_Agent):
         import os
         critic_local_path = "Models/{}_critic_local.pt".format(self.agent_name)
         critic_local_2_path = "Models/{}_critic_local_2.pt".format(self.agent_name)
-        actor_local_path = "Models/{}_critic_local.pt".format(self.agent_name)
+        actor_local_path = "Models/{}_actor_local.pt".format(self.agent_name)
         if os.path.isfile(critic_local_path):
             self.critic_local.load_state_dict(torch.load(critic_local_path))
         if os.path.isifle(critic_local_2_path):
