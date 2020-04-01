@@ -241,3 +241,11 @@ class SAC(Base_Agent):
         print("----------------------------")
         print("Episode score {} ".format(self.total_episode_score_so_far))
         print("----------------------------")
+
+
+
+    def locally_save_policy(self):
+        """Saves the policy"""
+        """保存策略，待添加"""
+        pass
+        # torch.save(self.q_network_local.state_dict(), "Models/{}_local_network.pt".format(self.agent_name))

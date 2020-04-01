@@ -7,6 +7,7 @@ import gym-anytrading
 import os
 import sys
 from os.path import dirname, abspath
+
 sys.path.append(dirname(dirname(abspath(__file__))))
 
 import gym
@@ -27,7 +28,7 @@ from agents.DQN_agents.DQN_With_Fixed_Q_Targets import DQN_With_Fixed_Q_Targets
 config = Config()
 config.seed = 1
 # config.environment  = gym.make('stocks-v0', frame_bound=(50, 100), window_size=10)
-config.environment  = gym.make('stocks-v0')
+config.environment = gym.make('stocks-v0')
 # config.environment = gym.make("CartPole-v0")
 config.num_episodes_to_run = 10
 # config.num_episodes_to_run = 450
@@ -38,11 +39,10 @@ config.visualise_individual_results = False
 config.visualise_overall_agent_results = True
 config.standard_deviation_results = 1.0
 config.runs_per_agent = 1
-config.use_GPU = False
+config.use_GPU = True
 config.overwrite_existing_results_file = False
 config.randomise_random_seed = True
-config.save_model = False
-
+config.save_model = True
 
 config.hyperparameters = {
     "DQN_Agents": {
@@ -87,14 +87,14 @@ config.hyperparameters = {
         "episodes_per_learning_round": 4,
         "normalise_rewards": True,
         "gradient_clipping_norm": 7.0,
-        "mu": 0.0, #only required for continuous action games
-        "theta": 0.0, #only required for continuous action games
-        "sigma": 0.0, #only required for continuous action games
+        "mu": 0.0,  # only required for continuous action games
+        "theta": 0.0,  # only required for continuous action games
+        "sigma": 0.0,  # only required for continuous action games
         "epsilon_decay_rate_denominator": 1.0,
         "clip_rewards": False
     },
 
-    "Actor_Critic_Agents":  {
+    "Actor_Critic_Agents": {
 
         "learning_rate": 0.005,
         "linear_hidden_units": [20, 10],
@@ -130,9 +130,9 @@ config.hyperparameters = {
         "min_steps_before_learning": 400,
         "batch_size": 256,
         "discount_rate": 0.99,
-        "mu": 0.0, #for O-H noise
-        "theta": 0.15, #for O-H noise
-        "sigma": 0.25, #for O-H noise
+        "mu": 0.0,  # for O-H noise
+        "theta": 0.15,  # for O-H noise
+        "sigma": 0.25,  # for O-H noise
         "action_noise_std": 0.2,  # for TD3
         "action_noise_clipping_range": 0.5,  # for TD3
         "update_every_n_steps": 1,
@@ -146,6 +146,10 @@ config.hyperparameters = {
 
 if __name__ == "__main__":
     AGENTS = [SAC_Discrete, DDQN, Dueling_DDQN, DQN, DQN_With_Fixed_Q_Targets,
-              DDQN_With_Prioritised_Experience_Replay, A2C, PPO, A3C ]
+              DDQN_With_Prioritised_Experience_Replay, A2C, PPO, A3C]
+    AGENTS = [SAC_Discrete,
+              # DDQN, Dueling_DDQN, DQN, DQN_With_Fixed_Q_Targets,
+              # DDQN_With_Prioritised_Experience_Replay, A2C, PPO, A3C
+              ]
     trainer = Trainer(config, AGENTS)
     trainer.run_games_for_agents()
