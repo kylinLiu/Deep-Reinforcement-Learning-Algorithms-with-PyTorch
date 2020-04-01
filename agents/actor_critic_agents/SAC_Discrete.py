@@ -7,27 +7,33 @@ from utilities.data_structures.Replay_Buffer import Replay_Buffer
 from agents.actor_critic_agents.SAC import SAC
 from utilities.Utility_Functions import create_actor_distribution
 
+
 class SAC_Discrete(SAC):
     """The Soft Actor Critic for discrete actions. It inherits from SAC for continuous actions and only changes a few
     methods."""
     """演员评论家的离散动作。 它继承自SAC以进行连续操作，仅更改了一些方法。"""
     agent_name = "SAC"
+
     def __init__(self, config):
         Base_Agent.__init__(self, config)
         assert self.action_types == "DISCRETE", "Action types must be discrete. Use SAC instead for continuous actions"
-        assert self.config.hyperparameters["Actor"]["final_layer_activation"] == "Softmax", "Final actor layer must be softmax"
+        assert self.config.hyperparameters["Actor"][
+                   "final_layer_activation"] == "Softmax", "Final actor layer must be softmax"
         self.hyperparameters = config.hyperparameters
         self.critic_local = self.create_NN(input_dim=self.state_size, output_dim=self.action_size, key_to_use="Critic")
         self.critic_local_2 = self.create_NN(input_dim=self.state_size, output_dim=self.action_size,
-                                           key_to_use="Critic", override_seed=self.config.seed + 1)
+                                             key_to_use="Critic", override_seed=self.config.seed + 1)
+
+        self.actor_local = self.create_NN(input_dim=self.state_size, output_dim=self.action_size, key_to_use="Actor")
+        if self.config.load_model: self.locally_load_policy()
         self.critic_optimizer = torch.optim.Adam(self.critic_local.parameters(),
                                                  lr=self.hyperparameters["Critic"]["learning_rate"], eps=1e-4)
         self.critic_optimizer_2 = torch.optim.Adam(self.critic_local_2.parameters(),
                                                    lr=self.hyperparameters["Critic"]["learning_rate"], eps=1e-4)
         self.critic_target = self.create_NN(input_dim=self.state_size, output_dim=self.action_size,
-                                           key_to_use="Critic")
-        self.critic_target_2 = self.create_NN(input_dim=self.state_size, output_dim=self.action_size,
                                             key_to_use="Critic")
+        self.critic_target_2 = self.create_NN(input_dim=self.state_size, output_dim=self.action_size,
+                                              key_to_use="Critic")
         Base_Agent.copy_model_over(self.critic_local, self.critic_target)
         Base_Agent.copy_model_over(self.critic_local_2, self.critic_target_2)
         self.memory = Replay_Buffer(self.hyperparameters["Critic"]["buffer_size"], self.hyperparameters["batch_size"],
@@ -35,7 +41,7 @@ class SAC_Discrete(SAC):
 
         self.actor_local = self.create_NN(input_dim=self.state_size, output_dim=self.action_size, key_to_use="Actor")
         self.actor_optimizer = torch.optim.Adam(self.actor_local.parameters(),
-                                          lr=self.hyperparameters["Actor"]["learning_rate"], eps=1e-4)
+                                                lr=self.hyperparameters["Actor"]["learning_rate"], eps=1e-4)
         self.automatic_entropy_tuning = self.hyperparameters["automatically_tune_entropy_hyperparameter"]
         if self.automatic_entropy_tuning:
             # we set the max possible entropy as the target entropy
@@ -45,7 +51,8 @@ class SAC_Discrete(SAC):
             self.alpha_optim = Adam([self.log_alpha], lr=self.hyperparameters["Actor"]["learning_rate"], eps=1e-4)
         else:
             self.alpha = self.hyperparameters["entropy_term_weight"]
-        assert not self.hyperparameters["add_extra_noise"], "There is no add extra noise option for the discrete version of SAC at moment"
+        assert not self.hyperparameters[
+            "add_extra_noise"], "There is no add extra noise option for the discrete version of SAC at moment"
         self.add_extra_noise = False
         self.do_evaluation_iterations = self.hyperparameters["do_evaluation_iterations"]
 
@@ -53,7 +60,7 @@ class SAC_Discrete(SAC):
         """Given the state, produces an action, the probability of the action, the log probability of the action, and
         the argmax action"""
         """给定状态，将产生一个动作，该动作的概率，该动作的对数概率以及argmax动作"""
-#         print("state",state)
+        #         print("state",state)
         action_probabilities = self.actor_local(state)
         max_probability_action = torch.argmax(action_probabilities).unsqueeze(0)
         action_distribution = create_actor_distribution(self.action_types, action_probabilities, self.action_size)
@@ -62,9 +69,9 @@ class SAC_Discrete(SAC):
         # Have to deal with situation of 0.0 probabilities because we can't do log 0
         z = action_probabilities == 0.0
         z = z.float() * 1e-8
-#         print("action_probabilities",action_probabilities)
-#         print("max_probability_action",max_probability_action)
-#         print("action",action)
+        #         print("action_probabilities",action_probabilities)
+        #         print("max_probability_action",max_probability_action)
+        #         print("action",action)
         log_action_probabilities = torch.log(action_probabilities + z)
         return action, (action_probabilities, log_action_probabilities), max_probability_action
 
@@ -73,12 +80,16 @@ class SAC_Discrete(SAC):
          term is taken into account"""
         """计算两个评论家的损失。 这是普通的Q学习损失，只是考虑了额外的熵项"""
         with torch.no_grad():
-            next_state_action, (action_probabilities, log_action_probabilities), _ = self.produce_action_and_action_info(next_state_batch)
+            next_state_action, (
+                action_probabilities, log_action_probabilities), _ = self.produce_action_and_action_info(
+                next_state_batch)
             qf1_next_target = self.critic_target(next_state_batch)
             qf2_next_target = self.critic_target_2(next_state_batch)
-            min_qf_next_target = action_probabilities * (torch.min(qf1_next_target, qf2_next_target) - self.alpha * log_action_probabilities)
+            min_qf_next_target = action_probabilities * (
+                torch.min(qf1_next_target, qf2_next_target) - self.alpha * log_action_probabilities)
             min_qf_next_target = min_qf_next_target.mean(dim=1).unsqueeze(-1)
-            next_q_value = reward_batch + (1.0 - mask_batch) * self.hyperparameters["discount_rate"] * (min_qf_next_target)
+            next_q_value = reward_batch + (1.0 - mask_batch) * self.hyperparameters["discount_rate"] * (
+                min_qf_next_target)
 
         qf1 = self.critic_local(state_batch).gather(1, action_batch.long())
         qf2 = self.critic_local_2(state_batch).gather(1, action_batch.long())
