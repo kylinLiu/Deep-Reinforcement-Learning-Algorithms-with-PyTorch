@@ -281,7 +281,7 @@ class SAC(Base_Agent):
         critic_local_path = "Models/{}_critic_local.pt".format(self.agent_name)
         critic_local_2_path = "Models/{}_critic_local_2.pt".format(self.agent_name)
         actor_local_path = "Models/{}_actor_local.pt".format(self.agent_name)
-	print("locall_load_policy")
+        print("locall_load_policy")
         if os.path.isfile(critic_local_path):
             print("load critic_local_path")
             self.critic_local.load_state_dict(torch.load(critic_local_path))
