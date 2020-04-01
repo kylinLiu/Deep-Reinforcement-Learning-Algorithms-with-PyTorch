@@ -12,38 +12,47 @@ LOG_SIG_MIN = -20
 TRAINING_EPISODES_PER_EVAL_EPISODE = 10
 EPSILON = 1e-6
 
+
 class SAC(Base_Agent):
     """Soft Actor-Critic model based on the 2018 paper https://arxiv.org/abs/1812.05905 and on this github implementation
       https://github.com/pranz24/pytorch-soft-actor-critic. It is an actor-critic algorithm where the agent is also trained
       to maximise the entropy of their actions as well as their cumulative reward"""
     """基于2018年论文https://arxiv.org/abs/1812.05905和此github实现https://github.com/pranz24/pytorch-soft-actor-critic的Soft Actor-Critic模型。 这是一种行为批评算法，其中还对代理进行了训练，以使他们的行为及其累积奖励最大化"""
     agent_name = "SAC"
+
     def __init__(self, config):
         Base_Agent.__init__(self, config)
         assert self.action_types == "CONTINUOUS", "Action types must be continuous. Use SAC Discrete instead for discrete actions"
-        assert self.config.hyperparameters["Actor"]["final_layer_activation"] != "Softmax", "Final actor layer must not be softmax"
+        assert self.config.hyperparameters["Actor"][
+                   "final_layer_activation"] != "Softmax", "Final actor layer must not be softmax"
         self.hyperparameters = config.hyperparameters
-        self.critic_local = self.create_NN(input_dim=self.state_size + self.action_size, output_dim=1, key_to_use="Critic")
+        self.critic_local = self.create_NN(input_dim=self.state_size + self.action_size, output_dim=1,
+                                           key_to_use="Critic")
         self.critic_local_2 = self.create_NN(input_dim=self.state_size + self.action_size, output_dim=1,
-                                           key_to_use="Critic", override_seed=self.config.seed + 1)
+                                             key_to_use="Critic", override_seed=self.config.seed + 1)
+
+        self.actor_local = self.create_NN(input_dim=self.state_size, output_dim=self.action_size * 2,
+                                          key_to_use="Actor")
+
+        if self.config.load_model: self.locally_load_policy()
         self.critic_optimizer = torch.optim.Adam(self.critic_local.parameters(),
                                                  lr=self.hyperparameters["Critic"]["learning_rate"], eps=1e-4)
         self.critic_optimizer_2 = torch.optim.Adam(self.critic_local_2.parameters(),
                                                    lr=self.hyperparameters["Critic"]["learning_rate"], eps=1e-4)
         self.critic_target = self.create_NN(input_dim=self.state_size + self.action_size, output_dim=1,
-                                           key_to_use="Critic")
-        self.critic_target_2 = self.create_NN(input_dim=self.state_size + self.action_size, output_dim=1,
                                             key_to_use="Critic")
+        self.critic_target_2 = self.create_NN(input_dim=self.state_size + self.action_size, output_dim=1,
+                                              key_to_use="Critic")
         Base_Agent.copy_model_over(self.critic_local, self.critic_target)
         Base_Agent.copy_model_over(self.critic_local_2, self.critic_target_2)
         self.memory = Replay_Buffer(self.hyperparameters["Critic"]["buffer_size"], self.hyperparameters["batch_size"],
                                     self.config.seed)
-        self.actor_local = self.create_NN(input_dim=self.state_size, output_dim=self.action_size * 2, key_to_use="Actor")
         self.actor_optimizer = torch.optim.Adam(self.actor_local.parameters(),
-                                          lr=self.hyperparameters["Actor"]["learning_rate"], eps=1e-4)
+                                                lr=self.hyperparameters["Actor"]["learning_rate"], eps=1e-4)
         self.automatic_entropy_tuning = self.hyperparameters["automatically_tune_entropy_hyperparameter"]
         if self.automatic_entropy_tuning:
-            self.target_entropy = -torch.prod(torch.Tensor(self.environment.action_space.shape).to(self.device)).item() # heuristic value from the paper
+            self.target_entropy = -torch.prod(torch.Tensor(self.environment.action_space.shape).to(
+                self.device)).item()  # heuristic value from the paper
             self.log_alpha = torch.zeros(1, requires_grad=True, device=self.device)
             self.alpha = self.log_alpha.exp()
             self.alpha_optim = Adam([self.log_alpha], lr=self.hyperparameters["Actor"]["learning_rate"], eps=1e-4)
@@ -67,8 +76,11 @@ class SAC(Base_Agent):
             self.save_max_result_seen()
 
         elif (self.episode_number - 1) % TRAINING_EPISODES_PER_EVAL_EPISODE == 0:
-            self.game_full_episode_scores.extend([self.total_episode_score_so_far for _ in range(TRAINING_EPISODES_PER_EVAL_EPISODE)])
-            self.rolling_results.extend([np.mean(self.game_full_episode_scores[-1 * self.rolling_score_window:]) for _ in range(TRAINING_EPISODES_PER_EVAL_EPISODE)])
+            self.game_full_episode_scores.extend(
+                [self.total_episode_score_so_far for _ in range(TRAINING_EPISODES_PER_EVAL_EPISODE)])
+            self.rolling_results.extend(
+                [np.mean(self.game_full_episode_scores[-1 * self.rolling_score_window:]) for _ in
+                 range(TRAINING_EPISODES_PER_EVAL_EPISODE)])
             self.save_max_result_seen()
 
     def reset_game(self):
@@ -83,22 +95,22 @@ class SAC(Base_Agent):
         eval_ep = self.episode_number % TRAINING_EPISODES_PER_EVAL_EPISODE == 0 and self.do_evaluation_iterations
         self.episode_step_number_val = 0
         while not self.done:
-#             print("episode_step_number_val",self.episode_step_number_val)
+            #             print("episode_step_number_val",self.episode_step_number_val)
             self.episode_step_number_val += 1
-#             print("self.state_size/self.action_size:{}/{}".format(self.state_size, self.action_size))
+            #             print("self.state_size/self.action_size:{}/{}".format(self.state_size, self.action_size))
             self.action = self.pick_action(eval_ep)
-#             print("pick_action",self.action)
+            #             print("pick_action",self.action)
             self.conduct_action(self.action)
             if self.time_for_critic_and_actor_to_learn():
                 for _ in range(self.hyperparameters["learning_updates_per_learning_session"]):
                     self.learn()
             mask = False if self.episode_step_number_val >= self.environment._max_episode_steps else self.done
             if not eval_ep:
-#                 print("step save_experience")
+                #                 print("step save_experience")
                 self.save_experience(experience=(self.state, self.action, self.reward, self.next_state, mask))
             self.state = self.next_state
             self.global_step_number += 1
-#         print(self.total_episode_score_so_far)
+        # print(self.total_episode_score_so_far)
         if eval_ep: self.print_summary_of_latest_evaluation_episode()
         self.episode_number += 1
 
@@ -120,11 +132,13 @@ class SAC(Base_Agent):
           评估模式与培训模式之间的差异在于，培训模式需要更多的探索
         """
         if state is None: state = self.state
-        if eval_ep: action = self.actor_pick_action(state=state, eval=True)
+        if eval_ep:
+            action = self.actor_pick_action(state=state, eval=True)
         elif self.global_step_number < self.hyperparameters["min_steps_before_learning"]:
             action = self.environment.action_space.sample()
-#             print("Picking random action ", action)
-        else: action = self.actor_pick_action(state=state)
+        # print("Picking random action ", action)
+        else:
+            action = self.actor_pick_action(state=state)
         if self.add_extra_noise:
             action += self.noise.sample()
         return action
@@ -141,7 +155,8 @@ class SAC(Base_Agent):
         if state is None: state = self.state
         state = torch.FloatTensor([state]).to(self.device)
         if len(state.shape) == 1: state = state.unsqueeze(0)
-        if eval == False: action, _, _ = self.produce_action_and_action_info(state)
+        if eval == False:
+            action, _, _ = self.produce_action_and_action_info(state)
         else:
             with torch.no_grad():
                 _, z, action = self.produce_action_and_action_info(state)
@@ -153,11 +168,11 @@ class SAC(Base_Agent):
         """Given the state, produces an action, the log probability of the action, and the tanh of the mean action"""
         """给定状态，产生一个动作，该动作的对数概率和平均动作的tanh"""
         actor_output = self.actor_local(state)
-#         print("actor_output:",actor_output)
+        #         print("actor_output:",actor_output)
         mean, log_std = actor_output[:, :self.action_size], actor_output[:, self.action_size:]
         std = log_std.exp()
         normal = Normal(mean, std)
-        x_t = normal.rsample()  #rsample means it is sampled using reparameterisation trick
+        x_t = normal.rsample()  # rsample means it is sampled using reparameterisation trick
         action = torch.tanh(x_t)
         log_prob = normal.log_prob(x_t)
         log_prob -= torch.log(1 - action.pow(2) + EPSILON)
@@ -169,7 +184,8 @@ class SAC(Base_Agent):
         actor and critic"""
         """返回布尔值，指示是否有足够的经验可以学习，是时候让演员和评论家学习"""
         return self.global_step_number > self.hyperparameters["min_steps_before_learning"] and \
-               self.enough_experiences_to_learn_from() and self.global_step_number % self.hyperparameters["update_every_n_steps"] == 0
+               self.enough_experiences_to_learn_from() and self.global_step_number % self.hyperparameters[
+            "update_every_n_steps"] == 0
 
     def learn(self):
         """Runs a learning iteration for the actor, both critics and (if specified) the temperature parameter"""
@@ -180,14 +196,17 @@ class SAC(Base_Agent):
         # print("learn_reward_batch",reward_batch)
         # print("learn_next_state_batch",next_state_batch)
         # print("learn_mask_batch",mask_batch)
-        qf1_loss, qf2_loss = self.calculate_critic_losses(state_batch, action_batch, reward_batch, next_state_batch, mask_batch)
+        qf1_loss, qf2_loss = self.calculate_critic_losses(state_batch, action_batch, reward_batch, next_state_batch,
+                                                          mask_batch)
         policy_loss, log_pi = self.calculate_actor_loss(state_batch)
-        if self.automatic_entropy_tuning: alpha_loss = self.calculate_entropy_tuning_loss(log_pi)
-        else: alpha_loss = None
+        if self.automatic_entropy_tuning:
+            alpha_loss = self.calculate_entropy_tuning_loss(log_pi)
+        else:
+            alpha_loss = None
         self.update_all_parameters(qf1_loss, qf2_loss, policy_loss, alpha_loss)
 
     def sample_experiences(self):
-        return  self.memory.sample()
+        return self.memory.sample()
 
     def calculate_critic_losses(self, state_batch, action_batch, reward_batch, next_state_batch, mask_batch):
         """Calculates the losses for the two critics. This is the ordinary Q-learning loss except the additional entropy
@@ -197,7 +216,8 @@ class SAC(Base_Agent):
             qf1_next_target = self.critic_target(torch.cat((next_state_batch, next_state_action), 1))
             qf2_next_target = self.critic_target_2(torch.cat((next_state_batch, next_state_action), 1))
             min_qf_next_target = torch.min(qf1_next_target, qf2_next_target) - self.alpha * next_state_log_pi
-            next_q_value = reward_batch + (1.0 - mask_batch) * self.hyperparameters["discount_rate"] * (min_qf_next_target)
+            next_q_value = reward_batch + (1.0 - mask_batch) * self.hyperparameters["discount_rate"] * (
+                min_qf_next_target)
         qf1 = self.critic_local(torch.cat((state_batch, action_batch), 1))
         qf2 = self.critic_local_2(torch.cat((state_batch, action_batch), 1))
         qf1_loss = F.mse_loss(qf1, next_q_value)
@@ -243,10 +263,27 @@ class SAC(Base_Agent):
         print("Episode score {} ".format(self.total_episode_score_so_far))
         print("----------------------------")
 
-
-
     def locally_save_policy(self):
         """Saves the policy"""
         """保存策略，待添加"""
         pass
-        # torch.save(self.q_network_local.state_dict(), "Models/{}_local_network.pt".format(self.agent_name))
+        critic_local_path = "Models/{}_critic_local.pt".format(self.agent_name)
+        critic_local_2_path = "Models/{}_critic_local_2.pt".format(self.agent_name)
+        actor_local_path = "Models/{}_critic_local.pt".format(self.agent_name)
+        torch.save(self.critic_local.state_dict(), critic_local_path)
+        torch.save(self.critic_local_2.state_dict(), critic_local_2_path)
+        # torch.save(self.critic_target.state_dict(), "Models/{}_critic_target.pt".format(self.agent_name))
+        # torch.save(self.critic_target_2.state_dict(), "Models/{}_critic_target_2.pt".format(self.agent_name))
+        torch.save(self.actor_local.state_dict(), actor_local_path)
+
+    def locally_load_policy(self):
+        import os
+        critic_local_path = "Models/{}_critic_local.pt".format(self.agent_name)
+        critic_local_2_path = "Models/{}_critic_local_2.pt".format(self.agent_name)
+        actor_local_path = "Models/{}_critic_local.pt".format(self.agent_name)
+        if os.path.isfile(critic_local_path):
+            self.critic_local.load_state_dict(torch.load(critic_local_path))
+        if os.path.isifle(critic_local_2_path):
+            self.critic_local_2.load_state_dict(torch.load(critic_local_2_path))
+        if os.path.isfile(actor_local_path):
+            self.actor_local.load_state_dict(torch.load(actor_local_path))

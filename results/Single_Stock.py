@@ -43,6 +43,7 @@ config.use_GPU = False
 config.overwrite_existing_results_file = False
 config.randomise_random_seed = True
 config.save_model = True
+config.load_model = True
 
 config.hyperparameters = {
     "DQN_Agents": {
