@@ -16,6 +16,11 @@ class SAC_Discrete(SAC):
 
     def __init__(self, config):
         Base_Agent.__init__(self, config)
+        model_path = self.config.model_path if self.config.model_path else 'Models'
+        self.critic_local_path = os.path.join(model_path, "{}_critic_local.pt".format(self.agent_name))
+        self.critic_local_2_path = os.path.join(model_path, "{}_critic_local_2.pt".format(self.agent_name))
+        self.actor_local_path = os.path.join(model_path, "{}_actor_local.pt".format(self.agent_name))
+
         assert self.action_types == "DISCRETE", "Action types must be discrete. Use SAC instead for continuous actions"
         assert self.config.hyperparameters["Actor"][
                    "final_layer_activation"] == "Softmax", "Final actor layer must be softmax"
