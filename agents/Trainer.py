@@ -126,6 +126,7 @@ class Trainer(object):
             if self.config.run_test:
                 game_scores, rolling_scores, time_taken = agent.run_test()
                 plt.cla()
+                print("id",self.config.environment)
                 self.config.environment.render_all()
                 plt.show()
             else:
