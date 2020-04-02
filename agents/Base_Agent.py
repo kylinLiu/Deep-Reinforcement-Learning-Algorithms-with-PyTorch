@@ -95,7 +95,9 @@ class Base_Agent(object):
 
     def get_state_size(self):
         """Gets the state_size for the gym env into the correct shape for a neural network"""
+        print("reset environment")
         random_state = self.environment.reset()
+        print("random_state", random_state)
         if isinstance(random_state, dict):
             state_size = random_state["observation"].shape[0] + random_state["desired_goal"].shape[0]
             return state_size
