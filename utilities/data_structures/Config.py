@@ -1,5 +1,6 @@
 class Config(object):
     """Object to hold the config requirements for an agent/game"""
+
     def __init__(self):
         self.seed = None
         self.environment = None
@@ -13,11 +14,10 @@ class Config(object):
         self.hyperparameters = None
         self.use_GPU = None
         self.overwrite_existing_results_file = None
+        self.model_path = None
         self.save_model = False
         self.load_model = False
         self.standard_deviation_results = 1.0
         self.randomise_random_seed = True
         self.show_solution_score = False
         self.debug_mode = False
-
-

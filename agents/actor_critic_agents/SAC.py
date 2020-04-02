@@ -6,6 +6,7 @@ import torch
 import torch.nn.functional as F
 from torch.distributions import Normal
 import numpy as np
+import os
 
 LOG_SIG_MAX = 2
 LOG_SIG_MIN = -20
@@ -22,6 +23,11 @@ class SAC(Base_Agent):
 
     def __init__(self, config):
         Base_Agent.__init__(self, config)
+
+        model_path = self.config.model_path if self.config.model_path else 'Models'
+        self.critic_local_path = os.path.join(model_path, "{}_critic_local.pt".format(self.agent_name))
+        self.critic_local_2_path = os.path.join(model_path, "{}_critic_local_2.pt".format(self.agent_name))
+        self.actor_local_path = os.path.join(model_path, "{}_actor_local.pt".format(self.agent_name))
         assert self.action_types == "CONTINUOUS", "Action types must be continuous. Use SAC Discrete instead for discrete actions"
         assert self.config.hyperparameters["Actor"][
                    "final_layer_activation"] != "Softmax", "Final actor layer must not be softmax"
@@ -266,28 +272,20 @@ class SAC(Base_Agent):
     def locally_save_policy(self):
         """Saves the policy"""
         """保存策略，待添加"""
-        pass
-        critic_local_path = "Models/{}_critic_local.pt".format(self.agent_name)
-        critic_local_2_path = "Models/{}_critic_local_2.pt".format(self.agent_name)
-        actor_local_path = "Models/{}_actor_local.pt".format(self.agent_name)
-        torch.save(self.critic_local.state_dict(), critic_local_path)
-        torch.save(self.critic_local_2.state_dict(), critic_local_2_path)
+        torch.save(self.critic_local.state_dict(), self.critic_local_path)
+        torch.save(self.critic_local_2.state_dict(), self.critic_local_2_path)
         # torch.save(self.critic_target.state_dict(), "Models/{}_critic_target.pt".format(self.agent_name))
         # torch.save(self.critic_target_2.state_dict(), "Models/{}_critic_target_2.pt".format(self.agent_name))
-        torch.save(self.actor_local.state_dict(), actor_local_path)
+        torch.save(self.actor_local.state_dict(), self.actor_local_path)
 
     def locally_load_policy(self):
-        import os
-        critic_local_path = "Models/{}_critic_local.pt".format(self.agent_name)
-        critic_local_2_path = "Models/{}_critic_local_2.pt".format(self.agent_name)
-        actor_local_path = "Models/{}_actor_local.pt".format(self.agent_name)
         print("locall_load_policy")
-        if os.path.isfile(critic_local_path):
+        if os.path.isfile(self.critic_local_path):
             print("load critic_local_path")
-            self.critic_local.load_state_dict(torch.load(critic_local_path))
-        if os.path.isfile(critic_local_2_path):
+            self.critic_local.load_state_dict(torch.load(self.critic_local_path))
+        if os.path.isfile(self.critic_local_2_path):
             print("load critic_local_2_path")
-            self.critic_local_2.load_state_dict(torch.load(critic_local_2_path))
-        if os.path.isfile(actor_local_path):
+            self.critic_local_2.load_state_dict(torch.load(self.critic_local_2_path))
+        if os.path.isfile(self.actor_local_path):
             print("load actor_local_path")
-            self.actor_local.load_state_dict(torch.load(actor_local_path))
+            self.actor_local.load_state_dict(torch.load(self.actor_local_path))
