@@ -43,8 +43,9 @@ config.use_GPU = False
 config.overwrite_existing_results_file = False
 config.randomise_random_seed = True
 config.model_path = r'drive/My Drive/l_gym/Models'
-config.save_model = True
+config.save_model = False
 config.load_model = True
+config.run_test = True
 
 config.hyperparameters = {
     "DQN_Agents": {

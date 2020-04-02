@@ -214,6 +214,19 @@ class Base_Agent(object):
         if self.config.save_model: self.locally_save_policy()
         return self.game_full_episode_scores, self.rolling_results, time_taken
 
+    def run_test(self, show_whether_achieved_goal=True, save_and_print_results=True):
+        """Runs game to completion n times and then summarises results and saves model (if asked to)"""
+        start = time.time()
+        #             print("reset_game,reset_game")
+        self.reset_game()
+        #             print("step,step")
+        self.step()
+        if save_and_print_results: self.save_and_print_result()
+        time_taken = time.time() - start
+        if show_whether_achieved_goal: self.show_whether_achieved_goal()
+        if self.config.save_model: self.locally_save_policy()
+        return self.game_full_episode_scores, self.rolling_results, time_taken
+
     def conduct_action(self, action):
         """Conducts an action in the environment"""
         """在环境中进行操作"""
