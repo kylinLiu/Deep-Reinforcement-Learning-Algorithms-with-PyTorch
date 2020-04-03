@@ -46,6 +46,7 @@ config.model_path = r'drive/My Drive/l_gym/Models'
 config.save_model = False
 config.load_model = True
 config.run_test = True
+config.run_test_path = "results/data_and_graphs/stocks_run_test.png"
 
 config.hyperparameters = {
     "DQN_Agents": {

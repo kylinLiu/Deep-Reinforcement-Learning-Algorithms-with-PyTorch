@@ -18,6 +18,7 @@ class Config(object):
         self.save_model = False
         self.load_model = False
         self.run_test = False
+        self.run_test_path = False
         self.standard_deviation_results = 1.0
         self.randomise_random_seed = True
         self.show_solution_score = False
