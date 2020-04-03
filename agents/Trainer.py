@@ -5,7 +5,6 @@ import os
 import gym
 from gym import wrappers
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 class Trainer(object):
@@ -105,6 +104,7 @@ class Trainer(object):
         agent_group = self.agent_to_agent_group[agent_name]
         agent_round = 1
         for run in range(self.config.runs_per_agent):
+            """需要关注，agent的config和trainer的config有差异"""
             agent_config = copy.deepcopy(self.config)
 
             if self.environment_has_changeable_goals(
@@ -124,11 +124,8 @@ class Trainer(object):
             print(agent.hyperparameters)
             print("RANDOM SEED ", agent_config.seed)
             if self.config.run_test:
+                print("id",self.config.environment._position_history)
                 game_scores, rolling_scores, time_taken = agent.run_test()
-                plt.cla()
-                print("id",self.config.environment)
-                self.config.environment.render_all()
-                plt.show()
             else:
                 game_scores, rolling_scores, time_taken = agent.run_n_episodes()
             print("Time taken: {}".format(time_taken), flush=True)

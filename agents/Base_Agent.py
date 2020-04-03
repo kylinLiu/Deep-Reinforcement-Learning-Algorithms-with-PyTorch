@@ -10,6 +10,7 @@ import time
 from nn_builder.pytorch.NN import NN
 # from tensorboardX import SummaryWriter
 from torch.optim import optimizer
+import matplotlib.pyplot as plt
 
 
 class Base_Agent(object):
@@ -227,6 +228,11 @@ class Base_Agent(object):
         time_taken = time.time() - start
         if show_whether_achieved_goal: self.show_whether_achieved_goal()
         if self.config.save_model: self.locally_save_policy()
+
+        plt.cla()
+        print("id", self.config.environment._position_history)
+        self.config.environment.render_all()
+        plt.show()
         return self.game_full_episode_scores, self.rolling_results, time_taken
 
     def conduct_action(self, action):
