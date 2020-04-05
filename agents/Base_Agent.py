@@ -211,10 +211,10 @@ class Base_Agent(object):
             self.reset_game()
             #             print("step,step")
             self.step()
+            if self.config.save_model: self.locally_save_policy()
             if save_and_print_results: self.save_and_print_result()
         time_taken = time.time() - start
         if show_whether_achieved_goal: self.show_whether_achieved_goal()
-        if self.config.save_model: self.locally_save_policy()
         return self.game_full_episode_scores, self.rolling_results, time_taken
 
     def run_test(self, show_whether_achieved_goal=True, save_and_print_results=True):

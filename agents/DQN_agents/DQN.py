@@ -8,14 +8,19 @@ import numpy as np
 from agents.Base_Agent import Base_Agent
 from exploration_strategies.Epsilon_Greedy_Exploration import Epsilon_Greedy_Exploration
 from utilities.data_structures.Replay_Buffer import Replay_Buffer
+import os
 
 class DQN(Base_Agent):
     """A deep Q learning agent"""
     agent_name = "DQN"
     def __init__(self, config):
         Base_Agent.__init__(self, config)
+        model_path = self.config.model_path if self.config.model_path else 'Models'
         self.memory = Replay_Buffer(self.hyperparameters["buffer_size"], self.hyperparameters["batch_size"], config.seed)
         self.q_network_local = self.create_NN(input_dim=self.state_size, output_dim=self.action_size)
+        self.q_network_local_path = os.path.join(model_path, "{}_q_network_local.pt".format(self.agent_name))
+
+        if self.config.load_model: self.locally_load_policy()
         self.q_network_optimizer = optim.Adam(self.q_network_local.parameters(),
                                               lr=self.hyperparameters["learning_rate"], eps=1e-4)
         self.exploration_strategy = Epsilon_Greedy_Exploration(config)
@@ -95,10 +100,6 @@ class DQN(Base_Agent):
         Q_expected = self.q_network_local(states).gather(1, actions.long()) #must convert actions to long so can be used as index
         return Q_expected
 
-    def locally_save_policy(self):
-        """Saves the policy"""
-        torch.save(self.q_network_local.state_dict(), "Models/{}_local_network.pt".format(self.agent_name))
-
     def time_for_q_network_to_learn(self):
         """Returns boolean indicating whether enough steps have been taken for learning to begin and there are
         enough experiences in the replay buffer to learn from"""
@@ -113,3 +114,14 @@ class DQN(Base_Agent):
         experiences = self.memory.sample()
         states, actions, rewards, next_states, dones = experiences
         return states, actions, rewards, next_states, dones
+
+    def locally_save_policy(self):
+        """Saves the policy"""
+        """保存策略，待添加"""
+        torch.save(self.q_network_local.state_dict(), self.q_network_local_path)
+
+    def locally_load_policy(self):
+        print("locall_load_policy")
+        if os.path.isfile(self.q_network_local_path):
+            print("load critic_local_path")
+            self.q_network_local.load_state_dict(torch.load(self.q_network_local_path))

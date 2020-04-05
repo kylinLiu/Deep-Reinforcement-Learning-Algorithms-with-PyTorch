@@ -30,7 +30,7 @@ config.seed = 1
 # config.environment  = gym.make('stocks-v0', frame_bound=(50, 100), window_size=10)
 config.environment = gym.make('stocks-v0')
 # config.environment = gym.make("CartPole-v0")
-config.num_episodes_to_run = 20
+config.num_episodes_to_run = 50
 # config.num_episodes_to_run = 450
 config.file_to_save_data_results = "results/data_and_graphs/stocks_Results_Data.pkl"
 config.file_to_save_results_graph = "results/data_and_graphs/stocks_Results_Graph.png"
@@ -43,9 +43,9 @@ config.use_GPU = False
 config.overwrite_existing_results_file = False
 config.randomise_random_seed = True
 config.model_path = r'drive/My Drive/l_gym/Models'
-config.save_model = False
+config.save_model = True
 config.load_model = True
-config.run_test = True
+config.run_test = False
 config.run_test_path = "results/data_and_graphs/stocks_run_test.png"
 
 config.hyperparameters = {
@@ -152,7 +152,8 @@ if __name__ == "__main__":
     AGENTS = [SAC_Discrete, DDQN, Dueling_DDQN, DQN, DQN_With_Fixed_Q_Targets,
               DDQN_With_Prioritised_Experience_Replay, A2C, PPO, A3C]
     AGENTS = [SAC_Discrete,
-              # DDQN, Dueling_DDQN, DQN, DQN_With_Fixed_Q_Targets,
+              DDQN,
+              # Dueling_DDQN, DQN, DQN_With_Fixed_Q_Targets,
               # DDQN_With_Prioritised_Experience_Replay, A2C, PPO, A3C
               ]
     trainer = Trainer(config, AGENTS)
