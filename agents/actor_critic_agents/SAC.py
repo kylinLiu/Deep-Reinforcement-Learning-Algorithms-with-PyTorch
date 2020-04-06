@@ -6,6 +6,7 @@ import torch
 import torch.nn.functional as F
 from torch.distributions import Normal
 import numpy as np
+import os
 
 LOG_SIG_MAX = 2
 LOG_SIG_MIN = -20
