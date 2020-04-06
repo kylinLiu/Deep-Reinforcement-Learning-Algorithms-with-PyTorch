@@ -2,6 +2,7 @@ import torch
 from torch import optim
 from agents.Base_Agent import Base_Agent
 from agents.DQN_agents.DDQN import DDQN
+import os
 
 class Dueling_DDQN(DDQN):
     """A dueling double DQN agent as described in the paper http://proceedings.mlr.press/v48/wangf16.pdf"""
@@ -9,7 +10,12 @@ class Dueling_DDQN(DDQN):
 
     def __init__(self, config):
         DDQN.__init__(self, config)
+
+        model_path = self.config.model_path if self.config.model_path else 'Models'
         self.q_network_local = self.create_NN(input_dim=self.state_size, output_dim=self.action_size + 1)
+        self.q_network_local_path = os.path.join(model_path, "{}_q_network_local.pt".format(self.agent_name))
+
+        if self.config.load_model: self.locally_load_policy()
         self.q_network_optimizer = optim.Adam(self.q_network_local.parameters(), lr=self.hyperparameters["learning_rate"], eps=1e-4)
         self.q_network_target = self.create_NN(input_dim=self.state_size, output_dim=self.action_size + 1)
         Base_Agent.copy_model_over(from_model=self.q_network_local, to_model=self.q_network_target)

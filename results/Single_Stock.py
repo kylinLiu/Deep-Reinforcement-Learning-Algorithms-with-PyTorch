@@ -154,7 +154,8 @@ if __name__ == "__main__":
               DDQN_With_Prioritised_Experience_Replay, A2C, PPO, A3C]
     AGENTS = [SAC_Discrete,
               DDQN,
-              # Dueling_DDQN, DQN, DQN_With_Fixed_Q_Targets,
+              Dueling_DDQN,
+              #  DQN, DQN_With_Fixed_Q_Targets,
               # DDQN_With_Prioritised_Experience_Replay, A2C, PPO, A3C
               ]
     trainer = Trainer(config, AGENTS)
