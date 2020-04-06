@@ -232,7 +232,8 @@ class Base_Agent(object):
         plt.cla()
         print("id", self.config.environment._position_history)
         self.config.environment.render_all()
-        if self.config.run_test_path: plt.savefig(self.config.run_test_path)  # , bbox_inches="tight")
+        if self.config.run_test_path: plt.savefig(
+            self.config.run_test_path.format(self.agent_name))  # , bbox_inches="tight")
         plt.show()
         return self.game_full_episode_scores, self.rolling_results, time_taken
 
