@@ -123,5 +123,8 @@ class DQN(Base_Agent):
     def locally_load_policy(self):
         print("locall_load_policy")
         if os.path.isfile(self.q_network_local_path):
-            print("load critic_local_path")
-            self.q_network_local.load_state_dict(torch.load(self.q_network_local_path))
+            try:
+                self.q_network_local.load_state_dict(torch.load(self.q_network_local_path))
+                print("load critic_local_path")
+            except:
+                pass

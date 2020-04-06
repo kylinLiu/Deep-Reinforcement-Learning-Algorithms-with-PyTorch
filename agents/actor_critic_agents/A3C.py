@@ -8,6 +8,7 @@ from torch.multiprocessing import Queue
 from torch.optim import Adam
 from agents.Base_Agent import Base_Agent
 from utilities.Utility_Functions import create_actor_distribution, SharedAdam
+import os
 
 class A3C(Base_Agent):
     """Actor critic A3C algorithm from deepmind paper https://arxiv.org/pdf/1602.01783.pdf"""
@@ -16,7 +17,11 @@ class A3C(Base_Agent):
         super(A3C, self).__init__(config)
         self.num_processes = multiprocessing.cpu_count()
         self.worker_processes = max(1, self.num_processes - 2)
+
+        model_path = self.config.model_path if self.config.model_path else 'Models'
+        self.actor_local_path = os.path.join(model_path, "{}_actor_local.pt".format(self.agent_name))
         self.actor_critic = self.create_NN(input_dim=self.state_size, output_dim=[self.action_size, 1])
+        if self.config.load_model: self.locally_load_policy()
         self.actor_critic_optimizer = SharedAdam(self.actor_critic.parameters(), lr=self.hyperparameters["learning_rate"], eps=1e-4)
 
     def run_n_episodes(self):
@@ -227,3 +232,14 @@ class Actor_Critic_Worker(torch.multiprocessing.Process):
         gradients = [param.grad.clone() for param in self.local_model.parameters()]
         self.gradient_updates_queue.put(gradients)
 
+
+    def locally_save_policy(self):
+        """Saves the policy"""
+        """保存策略，待添加"""
+        torch.save(self.actor_local.state_dict(), self.actor_local_path)
+
+    def locally_load_policy(self):
+        print("locall_load_policy")
+        if os.path.isfile(self.actor_local_path):
+            print("load actor_local_path")
+            self.actor_local.load_state_dict(torch.load(self.actor_local_path))

@@ -4,7 +4,7 @@ from torch import optim
 from agents.Base_Agent import Base_Agent
 from utilities.data_structures.Replay_Buffer import Replay_Buffer
 from exploration_strategies.OU_Noise_Exploration import OU_Noise_Exploration
-
+import os
 class DDPG(Base_Agent):
     """A DDPG Agent"""
     agent_name = "DDPG"
@@ -13,15 +13,22 @@ class DDPG(Base_Agent):
         Base_Agent.__init__(self, config)
         self.hyperparameters = config.hyperparameters
         self.critic_local = self.create_NN(input_dim=self.state_size + self.action_size, output_dim=1, key_to_use="Critic")
+        self.actor_local = self.create_NN(input_dim=self.state_size, output_dim=self.action_size, key_to_use="Actor")
         self.critic_target = self.create_NN(input_dim=self.state_size + self.action_size, output_dim=1, key_to_use="Critic")
+        model_path = self.config.model_path if self.config.model_path else 'Models'
+        self.critic_local_path = os.path.join(model_path, "{}_critic_local.pt".format(self.agent_name))
+        self.critic_local_2_path = os.path.join(model_path, "{}_critic_local_2.pt".format(self.agent_name))
+        self.actor_local_path = os.path.join(model_path, "{}_actor_local.pt".format(self.agent_name))
+        if self.config.load_model: self.locally_load_policy()
         Base_Agent.copy_model_over(self.critic_local, self.critic_target)
 
         self.critic_optimizer = optim.Adam(self.critic_local.parameters(),
                                            lr=self.hyperparameters["Critic"]["learning_rate"], eps=1e-4)
         self.memory = Replay_Buffer(self.hyperparameters["Critic"]["buffer_size"], self.hyperparameters["batch_size"],
                                     self.config.seed)
-        self.actor_local = self.create_NN(input_dim=self.state_size, output_dim=self.action_size, key_to_use="Actor")
         self.actor_target = self.create_NN(input_dim=self.state_size, output_dim=self.action_size, key_to_use="Actor")
+
+        if self.config.load_model: self.locally_load_policy()
         Base_Agent.copy_model_over(self.actor_local, self.actor_target)
 
         self.actor_optimizer = optim.Adam(self.actor_local.parameters(),
@@ -113,3 +120,23 @@ class DDPG(Base_Agent):
         actions_pred = self.actor_local(states)
         actor_loss = -self.critic_local(torch.cat((states, actions_pred), 1)).mean()
         return actor_loss
+
+    def locally_save_policy(self):
+        """Saves the policy"""
+        """保存策略，待添加"""
+        torch.save(self.critic_local.state_dict(), self.critic_local_path)
+        # torch.save(self.critic_target.state_dict(), "Models/{}_critic_target.pt".format(self.agent_name))
+        # torch.save(self.critic_target_2.state_dict(), "Models/{}_critic_target_2.pt".format(self.agent_name))
+        torch.save(self.actor_local.state_dict(), self.actor_local_path)
+
+    def locally_load_policy(self):
+        print("locall_load_policy")
+        if os.path.isfile(self.critic_local_path):
+            print("load critic_local_path")
+            self.critic_local.load_state_dict(torch.load(self.critic_local_path))
+        if os.path.isfile(self.critic_local_2_path):
+            print("load critic_local_2_path")
+            self.critic_local_2.load_state_dict(torch.load(self.critic_local_2_path))
+        if os.path.isfile(self.actor_local_path):
+            print("load actor_local_path")
+            self.actor_local.load_state_dict(torch.load(self.actor_local_path))

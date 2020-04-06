@@ -6,7 +6,6 @@ import torch
 import torch.nn.functional as F
 from torch.distributions import Normal
 import numpy as np
-import os
 
 LOG_SIG_MAX = 2
 LOG_SIG_MIN = -20
@@ -18,7 +17,6 @@ class SAC(Base_Agent):
     """Soft Actor-Critic model based on the 2018 paper https://arxiv.org/abs/1812.05905 and on this github implementation
       https://github.com/pranz24/pytorch-soft-actor-critic. It is an actor-critic algorithm where the agent is also trained
       to maximise the entropy of their actions as well as their cumulative reward"""
-    """基于2018年论文https://arxiv.org/abs/1812.05905和此github实现https://github.com/pranz24/pytorch-soft-actor-critic的Soft Actor-Critic模型。 这是一种行为批评算法，其中还对代理进行了训练，以使他们的行为及其累积奖励最大化"""
     agent_name = "SAC"
 
     def __init__(self, config):
@@ -28,6 +26,7 @@ class SAC(Base_Agent):
         self.critic_local_path = os.path.join(model_path, "{}_critic_local.pt".format(self.agent_name))
         self.critic_local_2_path = os.path.join(model_path, "{}_critic_local_2.pt".format(self.agent_name))
         self.actor_local_path = os.path.join(model_path, "{}_actor_local.pt".format(self.agent_name))
+
         assert self.action_types == "CONTINUOUS", "Action types must be continuous. Use SAC Discrete instead for discrete actions"
         assert self.config.hyperparameters["Actor"][
                    "final_layer_activation"] != "Softmax", "Final actor layer must not be softmax"
@@ -36,11 +35,10 @@ class SAC(Base_Agent):
                                            key_to_use="Critic")
         self.critic_local_2 = self.create_NN(input_dim=self.state_size + self.action_size, output_dim=1,
                                              key_to_use="Critic", override_seed=self.config.seed + 1)
-
         self.actor_local = self.create_NN(input_dim=self.state_size, output_dim=self.action_size * 2,
                                           key_to_use="Actor")
-
         if self.config.load_model: self.locally_load_policy()
+
         self.critic_optimizer = torch.optim.Adam(self.critic_local.parameters(),
                                                  lr=self.hyperparameters["Critic"]["learning_rate"], eps=1e-4)
         self.critic_optimizer_2 = torch.optim.Adam(self.critic_local_2.parameters(),
@@ -75,7 +73,6 @@ class SAC(Base_Agent):
     def save_result(self):
         """Saves the result of an episode of the game. Overriding the method in Base Agent that does this because we only
         want to keep track of the results during the evaluation episodes"""
-        """保存游戏情节的结果。 覆盖执行此操作的Base Agent中的方法，因为我们只希望在评估情节期间跟踪结果"""
         if self.episode_number == 1 or not self.do_evaluation_iterations:
             self.game_full_episode_scores.extend([self.total_episode_score_so_far])
             self.rolling_results.append(np.mean(self.game_full_episode_scores[-1 * self.rolling_score_window:]))
@@ -91,32 +88,26 @@ class SAC(Base_Agent):
 
     def reset_game(self):
         """Resets the game information so we are ready to play a new episode"""
-        """重置游戏信息，以便我们准备播放新剧集"""
         Base_Agent.reset_game(self)
         if self.add_extra_noise: self.noise.reset()
 
     def step(self):
         """Runs an episode on the game, saving the experience and running a learning step if appropriate"""
-        """在游戏中运行一集，保存经验并在适当时运行学习步骤"""
         eval_ep = self.episode_number % TRAINING_EPISODES_PER_EVAL_EPISODE == 0 and self.do_evaluation_iterations
         self.episode_step_number_val = 0
         while not self.done:
-            #             print("episode_step_number_val",self.episode_step_number_val)
             self.episode_step_number_val += 1
-            #             print("self.state_size/self.action_size:{}/{}".format(self.state_size, self.action_size))
             self.action = self.pick_action(eval_ep)
-            #             print("pick_action",self.action)
             self.conduct_action(self.action)
             if self.time_for_critic_and_actor_to_learn():
                 for _ in range(self.hyperparameters["learning_updates_per_learning_session"]):
                     self.learn()
             mask = False if self.episode_step_number_val >= self.environment._max_episode_steps else self.done
-            if not eval_ep:
-                #                 print("step save_experience")
-                self.save_experience(experience=(self.state, self.action, self.reward, self.next_state, mask))
+            if not eval_ep: self.save_experience(
+                experience=(self.state, self.action, self.reward, self.next_state, mask))
             self.state = self.next_state
             self.global_step_number += 1
-        # print(self.total_episode_score_so_far)
+        print(self.total_episode_score_so_far)
         if eval_ep: self.print_summary_of_latest_evaluation_episode()
         self.episode_number += 1
 
@@ -124,25 +115,12 @@ class SAC(Base_Agent):
         """Picks an action using one of three methods: 1) Randomly if we haven't passed a certain number of steps,
          2) Using the actor in evaluation mode if eval_ep is True  3) Using the actor in training mode if eval_ep is False.
          The difference between evaluation and training mode is that training mode does more exploration"""
-        """	Picks an action using one of three methods: 
-	      1) Randomly if we haven't passed a certain number of steps,
-          2) Using the actor in evaluation mode if eval_ep is True 
-	      3) Using the actor in training mode if eval_ep is False.
-         The difference between evaluation and training mode is that training mode does more exploration
-	    """
-        """
-        使用以下三种方法之一选择一个动作：
-        1）如果我们没有经过一定数量的步骤，则是随机的，
-        2）如果eval_ep为True，则在评估模式下使用actor
-        3）如果eval_ep为False，则在训练模式下使用actor。
-          评估模式与培训模式之间的差异在于，培训模式需要更多的探索
-        """
         if state is None: state = self.state
         if eval_ep:
             action = self.actor_pick_action(state=state, eval=True)
         elif self.global_step_number < self.hyperparameters["min_steps_before_learning"]:
             action = self.environment.action_space.sample()
-        # print("Picking random action ", action)
+            print("Picking random action ", action)
         else:
             action = self.actor_pick_action(state=state)
         if self.add_extra_noise:
@@ -153,11 +131,6 @@ class SAC(Base_Agent):
         """Uses actor to pick an action in one of two ways: 1) If eval = False and we aren't in eval mode then it picks
         an action that has partly been randomly sampled 2) If eval = True then we pick the action that comes directly
         from the network and so did not involve any random sampling"""
-        """
-	    使用actor以两种方式之一选择动作：
-        1）如果eval = False，并且我们不在eval模式下，则它将选择已部分随机采样的操作
-        2）如果eval = True，则我们选择直接来自网络的操作，因此不涉及任何随机采样“”“
-        """
         if state is None: state = self.state
         state = torch.FloatTensor([state]).to(self.device)
         if len(state.shape) == 1: state = state.unsqueeze(0)
@@ -166,15 +139,12 @@ class SAC(Base_Agent):
         else:
             with torch.no_grad():
                 _, z, action = self.produce_action_and_action_info(state)
-        """can't convert CUDA tensor to numpy. Use Tensor.cpu() to copy the tensor to host memory first."""
         action = action.detach().cpu().numpy()
         return action[0]
 
     def produce_action_and_action_info(self, state):
         """Given the state, produces an action, the log probability of the action, and the tanh of the mean action"""
-        """给定状态，产生一个动作，该动作的对数概率和平均动作的tanh"""
         actor_output = self.actor_local(state)
-        #         print("actor_output:",actor_output)
         mean, log_std = actor_output[:, :self.action_size], actor_output[:, self.action_size:]
         std = log_std.exp()
         normal = Normal(mean, std)
@@ -188,20 +158,13 @@ class SAC(Base_Agent):
     def time_for_critic_and_actor_to_learn(self):
         """Returns boolean indicating whether there are enough experiences to learn from and it is time to learn for the
         actor and critic"""
-        """返回布尔值，指示是否有足够的经验可以学习，是时候让演员和评论家学习"""
         return self.global_step_number > self.hyperparameters["min_steps_before_learning"] and \
                self.enough_experiences_to_learn_from() and self.global_step_number % self.hyperparameters[
             "update_every_n_steps"] == 0
 
     def learn(self):
         """Runs a learning iteration for the actor, both critics and (if specified) the temperature parameter"""
-        """为演员，评论家和温度参数（如果指定）运行演员的学习迭代"""
         state_batch, action_batch, reward_batch, next_state_batch, mask_batch = self.sample_experiences()
-        # print("learn_state_batch",state_batch)
-        # print("learn_action_batch",action_batch)
-        # print("learn_reward_batch",reward_batch)
-        # print("learn_next_state_batch",next_state_batch)
-        # print("learn_mask_batch",mask_batch)
         qf1_loss, qf2_loss = self.calculate_critic_losses(state_batch, action_batch, reward_batch, next_state_batch,
                                                           mask_batch)
         policy_loss, log_pi = self.calculate_actor_loss(state_batch)
@@ -223,7 +186,7 @@ class SAC(Base_Agent):
             qf2_next_target = self.critic_target_2(torch.cat((next_state_batch, next_state_action), 1))
             min_qf_next_target = torch.min(qf1_next_target, qf2_next_target) - self.alpha * next_state_log_pi
             next_q_value = reward_batch + (1.0 - mask_batch) * self.hyperparameters["discount_rate"] * (
-                min_qf_next_target)
+            min_qf_next_target)
         qf1 = self.critic_local(torch.cat((state_batch, action_batch), 1))
         qf2 = self.critic_local_2(torch.cat((state_batch, action_batch), 1))
         qf1_loss = F.mse_loss(qf1, next_q_value)
@@ -247,7 +210,6 @@ class SAC(Base_Agent):
 
     def update_all_parameters(self, critic_loss_1, critic_loss_2, actor_loss, alpha_loss):
         """Updates the parameters for the actor, both critics and (if specified) the temperature parameter"""
-        """更新演员的参数，包括评论者和温度参数（如果指定）"""
         self.take_optimisation_step(self.critic_optimizer, self.critic_local, critic_loss_1,
                                     self.hyperparameters["Critic"]["gradient_clipping_norm"])
         self.take_optimisation_step(self.critic_optimizer_2, self.critic_local_2, critic_loss_2,

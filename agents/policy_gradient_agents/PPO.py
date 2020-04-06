@@ -7,6 +7,8 @@ from agents.Base_Agent import Base_Agent
 from exploration_strategies.Epsilon_Greedy_Exploration import Epsilon_Greedy_Exploration
 from utilities.Parallel_Experience_Generator import Parallel_Experience_Generator
 from utilities.Utility_Functions import normalise_rewards, create_actor_distribution
+import os
+
 
 class PPO(Base_Agent):
     """Proximal Policy Optimization agent"""
@@ -16,9 +18,13 @@ class PPO(Base_Agent):
         Base_Agent.__init__(self, config)
         self.policy_output_size = self.calculate_policy_output_size()
         self.policy_new = self.create_NN(input_dim=self.state_size, output_dim=self.policy_output_size)
+        model_path = self.config.model_path if self.config.model_path else 'Models'
+        self.policy_new_path = os.path.join(model_path, "{}_policy_new.pt".format(self.agent_name))
+        if self.config.load_model: self.locally_load_policy()
         self.policy_old = self.create_NN(input_dim=self.state_size, output_dim=self.policy_output_size)
         self.policy_old.load_state_dict(copy.deepcopy(self.policy_new.state_dict()))
-        self.policy_new_optimizer = optim.Adam(self.policy_new.parameters(), lr=self.hyperparameters["learning_rate"], eps=1e-4)
+        self.policy_new_optimizer = optim.Adam(self.policy_new.parameters(), lr=self.hyperparameters["learning_rate"],
+                                               eps=1e-4)
         self.episode_number = 0
         self.many_episode_states = []
         self.many_episode_actions = []
@@ -32,11 +38,12 @@ class PPO(Base_Agent):
         if self.action_types == "DISCRETE":
             return self.action_size
         elif self.action_types == "CONTINUOUS":
-            return self.action_size * 2 #Because we need 1 parameter for mean and 1 for std of distribution
+            return self.action_size * 2  # Because we need 1 parameter for mean and 1 for std of distribution
 
     def step(self):
         """Runs a step for the PPO agent"""
-        exploration_epsilon =  self.exploration_strategy.get_updated_epsilon_exploration({"episode_number": self.episode_number})
+        exploration_epsilon = self.exploration_strategy.get_updated_epsilon_exploration(
+            {"episode_number": self.episode_number})
         self.many_episode_states, self.many_episode_actions, self.many_episode_rewards = self.experience_generator.play_n_episodes(
             self.hyperparameters["episodes_per_learning_round"], exploration_epsilon)
         self.episode_number += self.hyperparameters["episodes_per_learning_round"]
@@ -60,7 +67,8 @@ class PPO(Base_Agent):
         for episode in range(len(self.many_episode_states)):
             discounted_returns = [0]
             for ix in range(len(self.many_episode_states[episode])):
-                return_value = self.many_episode_rewards[episode][-(ix + 1)] + self.hyperparameters["discount_rate"]*discounted_returns[-1]
+                return_value = self.many_episode_rewards[episode][-(ix + 1)] + self.hyperparameters["discount_rate"] * \
+                                                                               discounted_returns[-1]
                 discounted_returns.append(return_value)
             discounted_returns = discounted_returns[1:]
             all_discounted_returns.extend(discounted_returns[::-1])
@@ -70,15 +78,19 @@ class PPO(Base_Agent):
         """For each action calculates the ratio of the probability that the new policy would have picked the action vs.
          the probability the old policy would have picked it. This will then be used to inform the loss"""
         all_states = [state for states in self.many_episode_states for state in states]
-        all_actions = [[action] if self.action_types == "DISCRETE" else action for actions in self.many_episode_actions for action in actions ]
+        all_actions = [[action] if self.action_types == "DISCRETE" else action for actions in self.many_episode_actions
+                       for action in actions]
         all_states = torch.stack([torch.Tensor(states).float().to(self.device) for states in all_states])
 
         all_actions = torch.stack([torch.Tensor(actions).float().to(self.device) for actions in all_actions])
         all_actions = all_actions.view(-1, len(all_states))
 
-        new_policy_distribution_log_prob = self.calculate_log_probability_of_actions(self.policy_new, all_states, all_actions)
-        old_policy_distribution_log_prob = self.calculate_log_probability_of_actions(self.policy_old, all_states, all_actions)
-        ratio_of_policy_probabilities = torch.exp(new_policy_distribution_log_prob) / (torch.exp(old_policy_distribution_log_prob) + 1e-8)
+        new_policy_distribution_log_prob = self.calculate_log_probability_of_actions(self.policy_new, all_states,
+                                                                                     all_actions)
+        old_policy_distribution_log_prob = self.calculate_log_probability_of_actions(self.policy_old, all_states,
+                                                                                     all_actions)
+        ratio_of_policy_probabilities = torch.exp(new_policy_distribution_log_prob) / (
+            torch.exp(old_policy_distribution_log_prob) + 1e-8)
         return ratio_of_policy_probabilities
 
     def calculate_log_probability_of_actions(self, policy, states, actions):
@@ -92,11 +104,12 @@ class PPO(Base_Agent):
         """Calculates the PPO loss"""
         all_ratio_of_policy_probabilities = torch.squeeze(torch.stack(all_ratio_of_policy_probabilities))
         all_ratio_of_policy_probabilities = torch.clamp(input=all_ratio_of_policy_probabilities,
-                                                        min = -sys.maxsize,
-                                                        max = sys.maxsize)
+                                                        min=-sys.maxsize,
+                                                        max=sys.maxsize)
         all_discounted_returns = torch.tensor(all_discounted_returns).to(all_ratio_of_policy_probabilities)
         potential_loss_value_1 = all_discounted_returns * all_ratio_of_policy_probabilities
-        potential_loss_value_2 = all_discounted_returns * self.clamp_probability_ratio(all_ratio_of_policy_probabilities)
+        potential_loss_value_2 = all_discounted_returns * self.clamp_probability_ratio(
+            all_ratio_of_policy_probabilities)
         loss = torch.min(potential_loss_value_1, potential_loss_value_2)
         loss = -torch.mean(loss)
         return loss
@@ -104,7 +117,7 @@ class PPO(Base_Agent):
     def clamp_probability_ratio(self, value):
         """Clamps a value between a certain range determined by hyperparameter clip epsilon"""
         return torch.clamp(input=value, min=1.0 - self.hyperparameters["clip_epsilon"],
-                                  max=1.0 + self.hyperparameters["clip_epsilon"])
+                           max=1.0 + self.hyperparameters["clip_epsilon"])
 
     def take_policy_new_optimisation_step(self, loss):
         """Takes an optimisation step for the new policy"""
@@ -126,3 +139,14 @@ class PPO(Base_Agent):
             self.game_full_episode_scores.append(total_reward)
             self.rolling_results.append(np.mean(self.game_full_episode_scores[-1 * self.rolling_score_window:]))
         self.save_max_result_seen()
+
+    def locally_save_policy(self):
+        """Saves the policy"""
+        """保存策略，待添加"""
+        torch.save(self.policy_new.state_dict(), self.policy_new_path)
+
+    def locally_load_policy(self):
+        print("locall_load_policy")
+        if os.path.isfile(self.policy_new_path):
+            print("load actor_local_path")
+            self.policy_new.load_state_dict(torch.load(self.policy_new_path))

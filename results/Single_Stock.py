@@ -158,7 +158,9 @@ if __name__ == "__main__":
               DQN,
               DQN_With_Fixed_Q_Targets,
               DDQN_With_Prioritised_Experience_Replay,
-              # A2C, PPO, A3C
+              A2C,
+              PPO,
+              A3C
               ]
     trainer = Trainer(config, AGENTS)
     trainer.run_games_for_agents()
