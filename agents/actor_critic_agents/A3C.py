@@ -20,10 +20,10 @@ class A3C(Base_Agent):
         self.num_processes = multiprocessing.cpu_count()
         self.worker_processes = max(1, self.num_processes - 2)
 
-        # model_path = self.config.model_path if self.config.model_path else 'Models'
-        # self.actor_local_path = os.path.join(model_path, "{}_actor_local.pt".format(self.agent_name))
+        model_path = self.config.model_path if self.config.model_path else 'Models'
+        self.actor_local_path = os.path.join(model_path, "{}_actor_local.pt".format(self.agent_name))
         self.actor_critic = self.create_NN(input_dim=self.state_size, output_dim=[self.action_size, 1])
-        # if self.config.load_model: self.locally_load_policy()
+        if self.config.load_model: self.locally_load_policy()
         self.actor_critic_optimizer = SharedAdam(self.actor_critic.parameters(),
                                                  lr=self.hyperparameters["learning_rate"], eps=1e-4)
 
@@ -57,7 +57,7 @@ class A3C(Base_Agent):
         # optimizer_worker.kill()
         optimizer_worker.terminate()
 
-        # if self.config.save_model: self.locally_save_policy()
+        if self.config.save_model: self.locally_save_policy()
         time_taken = time.time() - start
         return self.game_full_episode_scores, self.rolling_results, time_taken
 
