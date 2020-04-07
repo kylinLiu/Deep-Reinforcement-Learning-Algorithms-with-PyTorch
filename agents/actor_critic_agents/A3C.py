@@ -21,7 +21,7 @@ class A3C(Base_Agent):
         self.worker_processes = max(1, self.num_processes - 2)
 
         model_path = self.config.model_path if self.config.model_path else 'Models'
-        self.actor_local_path = os.path.join(model_path, "{}_actor_local.pt".format(self.agent_name))
+        self.actor_critic_path = os.path.join(model_path, "{}_actor_critic.pt".format(self.agent_name))
         self.actor_critic = self.create_NN(input_dim=self.state_size, output_dim=[self.action_size, 1])
         if self.config.load_model: self.locally_load_policy()
         self.actor_critic_optimizer = SharedAdam(self.actor_critic.parameters(),
@@ -86,13 +86,13 @@ class A3C(Base_Agent):
     def locally_save_policy(self):
         """Saves the policy"""
         """保存策略，待添加"""
-        torch.save(self.actor_local.state_dict(), self.actor_local_path)
+        torch.save(self.actor_critic.state_dict(), self.aactor_critic_path)
 
     def locally_load_policy(self):
         print("locall_load_policy")
-        if os.path.isfile(self.actor_local_path):
-            print("load actor_local_path")
-            self.actor_local.load_state_dict(torch.load(self.actor_local_path))
+        if os.path.isfile(self.actor_critic_path):
+            print("load actor_critic_path")
+            self.actor_critic.load_state_dict(torch.load(self.actor_critic_path))
 
 
 class Actor_Critic_Worker(torch.multiprocessing.Process):
