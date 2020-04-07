@@ -54,7 +54,8 @@ class A3C(Base_Agent):
         self.print_results(episode_number, results_queue)
         for worker in processes:
             worker.join()
-        optimizer_worker.kill()
+        # optimizer_worker.kill()
+        optimizer_worker.terminate()
 
         # if self.config.save_model: self.locally_save_policy()
         time_taken = time.time() - start
