@@ -86,7 +86,7 @@ class A3C(Base_Agent):
     def locally_save_policy(self):
         """Saves the policy"""
         """保存策略，待添加"""
-        torch.save(self.actor_critic.state_dict(), self.aactor_critic_path)
+        torch.save(self.actor_critic.state_dict(), self.actor_critic_path)
 
     def locally_load_policy(self):
         print("locall_load_policy")
