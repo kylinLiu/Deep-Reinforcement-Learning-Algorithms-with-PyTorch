@@ -9,6 +9,7 @@ from torch.optim import Adam
 from agents.Base_Agent import Base_Agent
 from utilities.Utility_Functions import create_actor_distribution, SharedAdam
 import os
+import matplotlib.pyplot as plt
 
 
 class A3C(Base_Agent):
@@ -60,6 +61,49 @@ class A3C(Base_Agent):
         if self.config.save_model: self.locally_save_policy()
         time_taken = time.time() - start
         return self.game_full_episode_scores, self.rolling_results, time_taken
+
+
+    def run_test(self, show_whether_achieved_goal=True, save_and_print_results=True):
+        """Runs game to completion n times and then summarises results and saves model (if asked to)"""
+        start = time.time()
+
+        results_queue = Queue()
+        gradient_updates_queue = Queue()
+        episode_number = multiprocessing.Value('i', 0)
+        self.optimizer_lock = multiprocessing.Lock()
+        episodes_per_process = int(self.config.num_episodes_to_run / self.worker_processes) + 1
+        processes = []
+        self.actor_critic.share_memory()
+        self.actor_critic_optimizer.share_memory()
+
+        optimizer_worker = multiprocessing.Process(target=self.update_shared_model, args=(gradient_updates_queue,))
+        optimizer_worker.start()
+
+        for process_num in range(1):
+            worker = Actor_Critic_Worker(process_num, copy.deepcopy(self.environment), self.actor_critic,
+                                         episode_number, self.optimizer_lock,
+                                         self.actor_critic_optimizer, self.config, 1,
+                                         self.hyperparameters["epsilon_decay_rate_denominator"],
+                                         self.action_size, self.action_types,
+                                         results_queue, copy.deepcopy(self.actor_critic), gradient_updates_queue)
+            worker.start()
+            processes.append(worker)
+        self.print_results(episode_number, results_queue)
+        for worker in processes:
+            worker.join()
+        # optimizer_worker.kill()
+        optimizer_worker.terminate()
+
+        if self.config.save_model: self.locally_save_policy()
+
+        plt.cla()
+        print("id", self.config.environment._position_history)
+        self.config.environment.render_all()
+        if self.config.run_test_path: plt.savefig(
+            self.config.run_test_path.format(self.agent_name))  # , bbox_inches="tight")
+        plt.show()
+        return self.game_full_episode_scores, self.rolling_results, time_taken
+
 
     def print_results(self, episode_number, results_queue):
         """Worker that prints out results as they get put into a queue"""
