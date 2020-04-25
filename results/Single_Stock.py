@@ -29,7 +29,7 @@ config = Config()
 config.seed = 1
 # config.environment  = gym.make('stocks-v0', frame_bound=(50, 100), window_size=10)
 gym_anytrading.register_new('sz.000001')
-config.environment = gym.make('stocks-v0-sz.000001')
+config.environment = gym.make('stocks-v1')
 config.environment.update_df(lambda df:df.head(100))
 # config.environment = gym.make("CartPole-v0")
 config.num_episodes_to_run = 50
