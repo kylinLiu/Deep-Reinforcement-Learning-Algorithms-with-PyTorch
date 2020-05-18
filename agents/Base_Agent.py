@@ -104,6 +104,7 @@ class Base_Agent(object):
         print("reset environment")
         random_state = self.environment.reset()
         print("random_state", random_state)
+        print("random_state.size", random_state.size)
         if isinstance(random_state, dict):
             state_size = random_state["observation"].shape[0] + random_state["desired_goal"].shape[0]
             return state_size
