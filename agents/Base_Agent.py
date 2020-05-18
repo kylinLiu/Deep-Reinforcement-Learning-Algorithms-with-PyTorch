@@ -15,10 +15,12 @@ import matplotlib.pyplot as plt
 
 class Base_Agent(object):
     def __init__(self, config):
+
         self.logger = self.setup_logger()
         self.debug_mode = config.debug_mode
         # if self.debug_mode: self.tensorboard = SummaryWriter()
         self.config = config
+
         self.set_random_seeds(config.seed)
         self.environment = config.environment
         self.environment_title = self.get_environment_title()
@@ -29,6 +31,9 @@ class Base_Agent(object):
         self.lowest_possible_episode_score = self.get_lowest_possible_episode_score()
 
         self.state_size = int(self.get_state_size())
+        print("self.state_size,", self.state_size)
+        print("self.state_size,", self.state_size)
+        print("self.state_size,", self.state_size)
         self.hyperparameters = config.hyperparameters
         self.average_score_required_to_win = self.get_score_required_to_win()
         print("average_score_required_to_win", self.average_score_required_to_win)
