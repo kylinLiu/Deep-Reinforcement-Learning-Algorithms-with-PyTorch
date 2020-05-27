@@ -33,7 +33,7 @@ config.environment = gym.make('stocks-v1')
 # config.environment.update_df(lambda df:df.head(100))
 column_list = ['close', 'pctChg']
 column_list_str = "_".join(column_list)
-config.environment.update_df(df=None, column_list=column_list)
+config.environment.update_df(fn=None, column_list=column_list)
 # config.environment = gym.make("CartPole-v0")
 config.num_episodes_to_run = 50
 # config.num_episodes_to_run = 450
@@ -51,7 +51,10 @@ config.model_path = r'drive/My Drive/l_gym/Models/%s' % column_list_str
 config.save_model = False
 config.load_model = True
 config.run_test = True
-config.run_test_path = "results/data_and_graphs/%s/{}_run_test.png" % column_list_str
+config.run_test_path = r"drive/My Drive/l_gym/data_and_graphs/%s/{}_run_test.png" % column_list_str
+
+os.makedirs(config.model_path)
+os.makedirs(r"drive/My Drive/l_gym/data_and_graphs/%s" % column_list_str)
 
 config.hyperparameters = {
     "DQN_Agents": {
