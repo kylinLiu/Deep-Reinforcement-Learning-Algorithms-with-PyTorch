@@ -28,12 +28,14 @@ from agents.DQN_agents.DQN_With_Fixed_Q_Targets import DQN_With_Fixed_Q_Targets
 config = Config()
 config.seed = 1
 # config.environment  = gym.make('stocks-v0', frame_bound=(50, 100), window_size=10)
-gym_anytrading.register_new('sz.000001')
+# gym_anytrading.register_new('sz.000001')
+gym_anytrading.register_new('sh.600959')
 config.environment = gym.make('stocks-v1')
-# config.environment.update_df(lambda df:df.head(100))
-column_list = ['close', 'pctChg']
+# config.environment.update_df()
+column_list = ['turn', 'pctChg']
 column_list_str = "_".join(column_list)
-config.environment.update_df(fn=None, column_list=column_list)
+# config.environment.update_df(fn=None, column_list=column_list)
+config.environment.update_df(fn=lambda df:df.head(100), column_list=column_list)
 # config.environment = gym.make("CartPole-v0")
 config.num_episodes_to_run = 50
 # config.num_episodes_to_run = 450
@@ -53,8 +55,11 @@ config.load_model = True
 config.run_test = True
 config.run_test_path = r"drive/My Drive/l_gym/data_and_graphs/%s/{}_run_test.png" % column_list_str
 
-os.makedirs(config.model_path)
-os.makedirs(r"drive/My Drive/l_gym/data_and_graphs/%s" % column_list_str)
+try:
+    os.makedirs(config.model_path)
+    os.makedirs(r"drive/My Drive/l_gym/data_and_graphs/%s" % column_list_str)
+except:
+    pass
 
 config.hyperparameters = {
     "DQN_Agents": {
@@ -165,9 +170,9 @@ if __name__ == "__main__":
               DQN,
               DQN_With_Fixed_Q_Targets,
               DDQN_With_Prioritised_Experience_Replay,
-              A2C,
-              PPO,
-              A3C
+              # A2C,
+              # PPO,
+              # A3C
               ]
     trainer = Trainer(config, AGENTS)
     trainer.run_games_for_agents()
