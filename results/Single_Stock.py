@@ -30,7 +30,10 @@ config.seed = 1
 # config.environment  = gym.make('stocks-v0', frame_bound=(50, 100), window_size=10)
 gym_anytrading.register_new('sz.000001')
 config.environment = gym.make('stocks-v1')
-config.environment.update_df(lambda df:df.head(100))
+# config.environment.update_df(lambda df:df.head(100))
+column_list = ['close', 'pctChg']
+column_list_str = "_".join(column_list)
+config.environment.update_df(df=None, column_list=column_list)
 # config.environment = gym.make("CartPole-v0")
 config.num_episodes_to_run = 50
 # config.num_episodes_to_run = 450
@@ -44,11 +47,11 @@ config.runs_per_agent = 1
 config.use_GPU = False
 config.overwrite_existing_results_file = False
 config.randomise_random_seed = True
-config.model_path = r'drive/My Drive/l_gym/Models'
+config.model_path = r'drive/My Drive/l_gym/Models/%s' % column_list_str
 config.save_model = False
 config.load_model = True
 config.run_test = True
-config.run_test_path = "results/data_and_graphs/{}_run_test.png"
+config.run_test_path = "results/data_and_graphs/%s/{}_run_test.png" % column_list_str
 
 config.hyperparameters = {
     "DQN_Agents": {
