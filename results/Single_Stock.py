@@ -32,10 +32,12 @@ config.seed = 1
 gym_anytrading.register_new('sh.600959')
 config.environment = gym.make('stocks-v1')
 # config.environment.update_df()
-column_list = ['turn', 'pctChg']
+# column_list = ['turn', 'pctChg']
+# column_list = ['turn', 'pctChg']
+column_list = ["turn","pctChg","peTTM","psTTM","pcfNcfTTM","pbMRQ"]
 column_list_str = "_".join(column_list)
-# config.environment.update_df(fn=None, column_list=column_list)
-config.environment.update_df(fn=lambda df:df.head(100), column_list=column_list)
+config.environment.update_df(fn=None, column_list=column_list)
+# config.environment.update_df(fn=lambda df:df.head(100), column_list=column_list)
 # config.environment = gym.make("CartPole-v0")
 config.num_episodes_to_run = 50
 # config.num_episodes_to_run = 450
@@ -50,9 +52,9 @@ config.use_GPU = False
 config.overwrite_existing_results_file = False
 config.randomise_random_seed = True
 config.model_path = r'drive/My Drive/l_gym/Models/%s' % column_list_str
-config.save_model = False
+config.save_model = True
 config.load_model = True
-config.run_test = True
+config.run_test = False
 config.run_test_path = r"drive/My Drive/l_gym/data_and_graphs/%s/{}_run_test.png" % column_list_str
 
 try:
