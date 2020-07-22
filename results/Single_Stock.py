@@ -30,7 +30,7 @@ config.seed = 1
 # config.environment  = gym.make('stocks-v0', frame_bound=(50, 100), window_size=10)
 # gym_anytrading.register_new('sz.000001')
 # gym_anytrading.register_new('sh.600959')
-gym_anytrading.register_new_kzz('sh.600959')
+gym_anytrading.register_new_kzz('SH113581')
 config.environment = gym.make('kzz-v1')
 # config.environment.update_df()
 # column_list = ['turn', 'pctChg']
