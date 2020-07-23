@@ -115,7 +115,7 @@ class Base_Agent(object):
         """Gets average score required to win game"""
         print("TITLE ", self.environment_title)
         if self.environment_title == "FetchReach": return -5
-        if self.environment_title in ["AntMaze", "Hopper", "Walker2d", "stocks"]:
+        if self.environment_title in ["AntMaze", "Hopper", "Walker2d", "stocks", "kzz"]:
             print("Score required to win set to infinity therefore no learning rate annealing will happen")
             """获胜所需的分数设置为无穷大，因此不会发生学习率下降"""
             return float("inf")
