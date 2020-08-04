@@ -27,15 +27,124 @@ from agents.DQN_agents.DQN_With_Fixed_Q_Targets import DQN_With_Fixed_Q_Targets
 
 config = Config()
 config.seed = 1
+# symbol="SH113581"
+# symbol="SH113575"
+# symbol="SH113565"
+# symbol="SH113586"
+# symbol="SH123056"
+# symbol="SH128106"
+symbol="SZ123030"
+symbol="SH113552"
+symbol="SZ128092"
+symbol="SH113525"
+symbol="SZ127003"
+symbol="SH128088"
+symbol="SZ123041"
+symbol="SZ123029"
+symbol="SH123020"
+symbol="SH128080"
+symbol="SH113536"
+symbol="SH113558"
+symbol="SH123034"
+symbol="SH128059"
+symbol="SH127015"
+symbol="SH113577"
+symbol="SH113585"
+symbol="SH113504"
+symbol="SH128108"
+symbol="SH113572"
+symbol="SH113518"
+symbol="SZ123018"
+symbol="SH113555"
+symbol="SZ128043"
+symbol="SZ128086"
+symbol="SZ123027"
+# symbol="SH113554"
+# symbol="SH128021"
+# symbol="SH113548"
+# symbol="SH113578"
+# symbol="SH123051"
+# symbol="SH128022"
+# symbol="SH128079"
+# symbol="SH113580"
+# symbol="SH113027"
+# symbol="SH113571"
+# symbol="SH123022"
+# symbol="SH113545"
+# symbol="SH128075"
+# symbol="SH128102"
+# symbol="SH113556"
+# symbol="SH123037"
+# symbol="SH113031"
+# symbol="SH128030"
+# symbol="SH128089"
+# symbol="SH128074"
+# symbol="SH113521"
+# symbol="SH123026"
+# symbol="SH123031"
+# symbol="SH128084"
+# symbol="SH113547"
+# symbol="SH113509"
+# symbol="SH113520"
+# symbol="SH113514"
+# symbol="SH128036"
+# symbol="SH123048"
+# symbol="SH128045"
+# symbol="SH113550"
+# symbol="SH113019"
+# symbol="SH113028"
+# symbol="SH128029"
+# symbol="SH128104"
+# symbol="SH110042"
+# symbol="SH128098"
+# symbol="SH128017"
+# symbol="SH128115"
+# symbol="SH110060"
+# symbol="SH113566"
+# symbol="SH132021"
+# symbol="SH113022"
+# symbol="SH128078"
+# symbol="SH128039"
+# symbol="SH113567"
+# symbol="SH113035"
+# symbol="SH113541"
+# symbol="SH128099"
+# symbol="SH123044"
+# symbol="SH127005"
+# symbol="SH128103"
+# symbol="SH128066"
+# symbol="SH123025"
+# symbol="SH128013"
+# symbol="SH113008"
+# symbol="SH128053"
+# symbol="SH123002"
+# symbol="SH113526"
+# symbol="SH110066"
+# symbol="SH123040"
+# symbol="SH113543"
+# symbol="SH128114"
+# symbol="SH132018"
+# symbol="SH123047"
+# symbol="SH123038"
+# symbol="SH113561"
+# symbol="SH128096"
+# symbol="SH110058"
+# symbol="SZ128105"
+# symbol="SH128019"
+# symbol="SZ128112"
+# symbol="SH123052"
+# symbol="SH113553"
+# symbol="SH123032"
 # config.environment  = gym.make('stocks-v0', frame_bound=(50, 100), window_size=10)
 # gym_anytrading.register_new('sz.000001')
 # gym_anytrading.register_new('sh.600959')
-gym_anytrading.register_new_kzz('SH113581')
+print(symbol)
+gym_anytrading.register_new_kzz(symbol)
 config.environment = gym.make('kzz-v1')
 # config.environment.update_df()
 # column_list = ['turn', 'pctChg']
 # column_list = ['turn', 'pctChg']
-column_list = ["test"]
+column_list = ["test2"]
 # column_list = ["turn", "pctChg", "peTTM", "psTTM", "pcfNcfTTM", "pbMRQ"]
 column_list_str = "_".join(column_list)
 # config.environment.update_df(fn=None, column_list=column_list)
@@ -58,11 +167,12 @@ config.model_path = r'drive/My Drive/l_gym/Models/%s' % column_list_str
 config.save_model = True
 config.load_model = True
 config.run_test = False
-config.run_test_path = r"drive/My Drive/l_gym/data_and_graphs/%s/{}_run_test.png" % column_list_str
+config.run_test_path = r"drive/My Drive/l_gym/data_and_graphs/%s/%s/{}_run_test.png" % (symbol,column_list_str)
+# config.run_test_path = r"drive/My Drive/l_gym/data_and_graphs/%s/{}_run_test.png" % column_list_str
 
 try:
     os.makedirs(config.model_path)
-    os.makedirs(r"drive/My Drive/l_gym/data_and_graphs/%s" % column_list_str)
+    os.makedirs(r"drive/My Drive/l_gym/data_and_graphs/%s/%s" % (symbol,column_list_str))
 except:
     pass
 
