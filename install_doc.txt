@@ -1,0 +1,30 @@
+centos7 环境安装指南
+
+安装pyenv
+	https://www.cnblogs.com/panwenbin-logs/p/11040346.html
+	1.>安装依赖包:
+	yum install zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-devel -y
+
+	2.>安装pyenv包:
+	git clone https://github.com/pyenv/pyenv.git ~/.pyenv
+
+	3.>设置环境变量:
+	#vim ~/.bashrc
+	export PYENV_ROOT="$HOME/.pyenv"
+	export PATH="$PYENV_ROOT/bin:$PATH"
+	eval "$(pyenv init -)"
+
+	#source ~/.bashrc
+	#即是启动语句，重启系统执行这条语句
+	exec bash
+
+
+安装python 3.7.6
+	pyenv install 3.7.6
+	pyenv global 3.7.6
+	python -m pip install --upgrade pip
+下载Deep-Reinforcement-Learning-Algorithms-with-PyTorch项目
+	git clone https://github.com/kylinLiu/Deep-Reinforcement-Learning-Algorithms-with-PyTorch.git
+	cd Deep-Reinforcement-Learning-Algorithms-with-PyTorch
+	pip install -r requirements.txt
+	pip install -r requirements_new.txt --use-feature=2020-resolver
