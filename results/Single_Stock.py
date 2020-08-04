@@ -172,10 +172,12 @@ config.run_test_path = r"drive/My Drive/l_gym/data_and_graphs/%s/%s/{}_run_test.
 
 try:
     os.makedirs(config.model_path)
+except:
+    pass
+try:
     os.makedirs(r"drive/My Drive/l_gym/data_and_graphs/%s/%s" % (symbol,column_list_str))
 except:
     pass
-
 config.hyperparameters = {
     "DQN_Agents": {
         "learning_rate": 0.01,
